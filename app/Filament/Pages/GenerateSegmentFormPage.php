@@ -4,16 +4,17 @@ namespace App\Filament\Pages;
 
 use App\Models\City;
 use App\Models\Shop;
+use App\Models\Seller;
+use App\Enum\AlertEnum;
 use Filament\Pages\Page;
 use App\Models\Department;
 use App\Models\ReturnAlert;
 use App\Models\Segmentation;
 use App\Models\PaymentMethod;
-use App\Models\Seller;
+use App\Enum\PaymentMethodEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
-use Illuminate\Console\View\Components\Alert;
 
 class GenerateSegmentFormPage extends Page
 {
@@ -32,8 +33,7 @@ class GenerateSegmentFormPage extends Page
 
     public function submit(): void
     {
-
-        $this->notify('success', 'Formulario enviado con éxito!');
+        //aqui va el codigo para generar el segmento
     }
 
     protected function getFormSchema(): array
@@ -46,38 +46,37 @@ class GenerateSegmentFormPage extends Page
                     '2xl' => 8,
                 ])
                 ->schema([
-                    TextInput::make('name')
+                    TextInput::make('dias_desde_compra')
                         ->label('Días desde Compra')
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,
                             '2xl' => 4,
                         ]),
-                    TextInput::make('name')
+                    TextInput::make('hasta_dias_desde_compra')
                         ->label('Hasta Días desde Compra')
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,
                             '2xl' => 4,
                         ]),
-                    Select::make('method_id')
+                    Select::make('method')
                         ->label('Método de pago')
-                        ->searchable()
-                        ->preload()
-                        ->createOptionForm([
-                            TextInput::make('method')
-                                ->label('Método de pago')
-                                ->required(),
-                        ])
                         ->options(PaymentMethod::all()->pluck('method', 'id'))
+                        //->searchable()
+                        ->preload()
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,
                             '2xl' => 4,
                         ]),
+
                     Select::make('alert_id')
                         ->label('Alertas de devolución')
-                        ->options(ReturnAlert::all()->pluck('status', 'id'))
+                        ->enum(AlertEnum::class)
+                        ->options(AlertEnum::class)
+                        //->options(ReturnAlert::all()->pluck('status', 'id'))
+                        ->preload()
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,
@@ -85,7 +84,7 @@ class GenerateSegmentFormPage extends Page
                         ]),
                     Select::make('department_id')
                         ->label('Departamento')
-                        ->searchable()
+                        //->searchable()
                         ->preload()
                         ->createOptionForm([
                             TextInput::make('name')
@@ -101,7 +100,7 @@ class GenerateSegmentFormPage extends Page
 
                     Select::make('city_id')
                         ->label('Ciudad')
-                        ->searchable()
+                        //->searchable()
                         ->preload()
                         ->createOptionForm([
                             TextInput::make('name')
@@ -115,7 +114,7 @@ class GenerateSegmentFormPage extends Page
                             '2xl' => 4,
                         ]),
 
-                    TextInput::make('name')
+                    TextInput::make('limit')
                         ->label('Limite')
                         ->columnSpan([
                             'sm' => 2,
@@ -124,7 +123,7 @@ class GenerateSegmentFormPage extends Page
                         ]),
                     Select::make('segmentation_id')
                         ->label('Segmento')
-                        ->searchable()
+                        //->searchable()
                         ->preload()
                         ->createOptionForm([
                             TextInput::make('name')
@@ -140,7 +139,7 @@ class GenerateSegmentFormPage extends Page
 
                     Select::make('seller_id')
                         ->label('Vendedor')
-                        ->searchable()
+                        //->searchable()
                         ->preload()
                         ->createOptionForm([
                             TextInput::make('name')
@@ -156,7 +155,7 @@ class GenerateSegmentFormPage extends Page
 
                     Select::make('shop_id')
                         ->label('Tienda')
-                        ->searchable()
+                        //->searchable()
                         ->preload()
                         ->createOptionForm([
                             TextInput::make('name')
@@ -169,9 +168,7 @@ class GenerateSegmentFormPage extends Page
                             'xl' => 3,
                             '2xl' => 4,
                         ]),
-                ])
-
-
+                ]),
         ];
     }
 
