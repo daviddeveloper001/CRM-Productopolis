@@ -1,0 +1,21 @@
+models:
+  PaymentMethod:
+    method: enum:ContraEntrega,TransferenciaBancaria,Wompi,Addi,SisteCredito
+  
+  Department:
+    name: string:400
+    relationships:
+      hasMany: City
+  
+  City:
+    name: string:400
+    relationships:
+      belongsTo: Department
+
+  ReturnAlert:
+    status: enum:Top,Medium,Low
+
+  Shop:
+    name: string:400
+
+seeders: PaymentMethod, Department, City, ReturnAlert, Shop

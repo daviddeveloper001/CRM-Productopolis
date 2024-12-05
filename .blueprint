@@ -1,0 +1,28 @@
+created:
+    - database/factories/PaymentMethodFactory.php
+    - database/factories/DepartmentFactory.php
+    - database/factories/CityFactory.php
+    - database/factories/ReturnAlertFactory.php
+    - database/factories/ShopFactory.php
+    - database/migrations/2024_12_04_215759_create_payment_methods_table.php
+    - database/migrations/2024_12_04_215800_create_departments_table.php
+    - database/migrations/2024_12_04_215801_create_cities_table.php
+    - database/migrations/2024_12_04_215802_create_return_alerts_table.php
+    - database/migrations/2024_12_04_215803_create_shops_table.php
+    - app/Models/PaymentMethod.php
+    - app/Models/Department.php
+    - app/Models/City.php
+    - app/Models/ReturnAlert.php
+    - app/Models/Shop.php
+    - database/seeders/PaymentMethodSeeder.php
+    - database/seeders/DepartmentSeeder.php
+    - database/seeders/CitySeeder.php
+    - database/seeders/ReturnAlertSeeder.php
+    - database/seeders/ShopSeeder.php
+models:
+    User: { name: string, email: string, email_verified_at: 'timestamp nullable', password: string, remember_token: 'string:100 nullable' }
+    PaymentMethod: { method: 'enum:ContraEntrega,TransferenciaBancaria,Wompi,Addi,SisteCredito' }
+    Department: { name: 'string:400', relationships: { hasMany: City } }
+    City: { name: 'string:400', relationships: { belongsTo: Department } }
+    ReturnAlert: { status: 'enum:Top,Medium,Low' }
+    Shop: { name: 'string:400' }
