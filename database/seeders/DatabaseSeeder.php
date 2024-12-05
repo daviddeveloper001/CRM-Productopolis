@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             PaymentMethodSeeder::class,
             ReturnAlertSeeder::class,
             ShopSeeder::class,
-            UserSeeder::class
+            UserSeeder::class,
+            SegmentionSeeder::class,
         ]);
     }
 }
