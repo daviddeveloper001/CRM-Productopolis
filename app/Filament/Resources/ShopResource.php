@@ -23,6 +23,8 @@ class ShopResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Tiendas';
 
+    protected static ?string $modelLabel = 'Tienda';
+
     public static function form(Form $form): Form
     {
         return $form

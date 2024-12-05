@@ -23,12 +23,15 @@ class DepartmentResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Departamentos';
 
+    protected static ?string $modelLabel = 'Departamento';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
+                    ->label('Nombre')
                     ->maxLength(400),
             ]);
     }

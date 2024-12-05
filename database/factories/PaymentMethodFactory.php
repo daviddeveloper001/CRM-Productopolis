@@ -21,7 +21,7 @@ class PaymentMethodFactory extends Factory
     public function definition(): array
     {
         return [
-            'method' => $this->faker->randomElement(["ContraEntrega","TransferenciaBancaria","Wompi","Addi","SisteCredito"]),
+            'method' => $this->faker->regexify('[A-Za-z0-9]{400}'),
         ];
     }
 }

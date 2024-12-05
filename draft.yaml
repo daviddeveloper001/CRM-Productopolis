@@ -1,6 +1,6 @@
 models:
   PaymentMethod:
-    method: enum:ContraEntrega,TransferenciaBancaria,Wompi,Addi,SisteCredito
+    method: string:400
   
   Department:
     name: string:400

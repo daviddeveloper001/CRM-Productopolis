@@ -23,14 +23,18 @@ class CityResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Ciudades';
 
+    protected static ?string $modelLabel = 'Ciudad';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Ciudad')
                     ->required()
                     ->maxLength(400),
                 Forms\Components\Select::make('department_id')
+                ->label('Departamento')
                     ->relationship('department', 'name')
                     ->required(),
             ]);
@@ -41,8 +45,10 @@ class CityResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                ->label('Ciudad')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('department.name')
+                ->label('Departamento')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

@@ -2,16 +2,18 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PaymentMethodResource\Pages;
-use App\Filament\Resources\PaymentMethodResource\RelationManagers;
-use App\Models\PaymentMethod;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Enum\MethodEnum;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Models\PaymentMethod;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\PaymentMethodResource\Pages;
+use App\Filament\Resources\PaymentMethodResource\RelationManagers;
 
 class PaymentMethodResource extends Resource
 {
@@ -23,11 +25,15 @@ class PaymentMethodResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Métodos de pago';
 
+    protected static ?string $modelLabel = 'Método de pago';
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('method')
+                    ->unique()
+                    ->label('Método de pago')
                     ->required(),
             ]);
     }
@@ -36,7 +42,7 @@ class PaymentMethodResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('method'),
+                Tables\Columns\TextColumn::make('method')->label('Método de pago'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

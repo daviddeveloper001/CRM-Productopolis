@@ -12,6 +12,16 @@ class ReturnAlertSeeder extends Seeder
      */
     public function run(): void
     {
-        ReturnAlert::factory()->count(5)->create();
+        ReturnAlert::create([
+            'status' => 'Top',
+        ]);
+
+        ReturnAlert::create([
+            'status' => 'Medium',
+        ]);
+
+        ReturnAlert::create([
+            'status' => 'Low',
+        ]);
     }
 }

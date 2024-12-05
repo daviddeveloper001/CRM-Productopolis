@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payment_methods', function (Blueprint $table) {
             $table->id();
-            $table->enum('method', ["ContraEntrega","TransferenciaBancaria","Wompi","Addi","SisteCredito"]);
+            $table->string('method', 400);
             $table->timestamps();
         });
     }

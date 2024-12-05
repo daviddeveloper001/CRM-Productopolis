@@ -23,6 +23,8 @@ class ReturnAlertResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Alertas de Devoluciones';
 
+    protected static ?string $modelLabel = 'Alerta';
+
     public static function form(Form $form): Form
     {
         return $form

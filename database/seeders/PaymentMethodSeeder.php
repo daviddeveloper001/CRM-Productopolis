@@ -12,6 +12,24 @@ class PaymentMethodSeeder extends Seeder
      */
     public function run(): void
     {
-        PaymentMethod::factory()->count(5)->create();
+        PaymentMethod::create([
+            'method' => 'Contra Entrega',
+        ]);
+
+        PaymentMethod::create([
+            'method' => 'Transferencia Bancaria',
+        ]);
+
+        PaymentMethod::create([
+            'method' => 'Wompi',
+        ]);
+
+        PaymentMethod::create([
+            'method' => 'Addi',
+        ]);
+
+        PaymentMethod::create([
+            'method' => 'Sistecredito',
+        ]);
     }
 }
