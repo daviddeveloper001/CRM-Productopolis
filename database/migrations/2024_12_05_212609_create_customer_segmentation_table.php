@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('return_alerts', function (Blueprint $table) {
-            $table->id();
-            $table->enum('status', ["Top","Medium","Low"])->unique();
-            $table->timestamps();
+        Schema::create('customer_segmentation', function (Blueprint $table) {
+            $table->foreignId('customer_id')->constrained();
+            $table->foreignId('segmentation_id')->constrained();
         });
     }
 
@@ -23,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('return_alerts');
+        Schema::dropIfExists('customer_segmentation');
     }
 };

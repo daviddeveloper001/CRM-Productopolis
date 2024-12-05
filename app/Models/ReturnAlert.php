@@ -15,7 +15,7 @@ class ReturnAlert extends Model
      * @var array
      */
     protected $fillable = [
-        'status',
+        'type',
     ];
 
     /**

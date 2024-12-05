@@ -13,15 +13,15 @@ class ReturnAlertSeeder extends Seeder
     public function run(): void
     {
         ReturnAlert::create([
-            'status' => 'Top',
+            'type' => 'Alto',
         ]);
 
         ReturnAlert::create([
-            'status' => 'Medium',
+            'type' => 'Medio',
         ]);
 
         ReturnAlert::create([
-            'status' => 'Low',
+            'type' => 'Bajo',
         ]);
     }
 }

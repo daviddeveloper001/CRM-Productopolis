@@ -22,6 +22,7 @@ class ShopFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
+            'direction' => $this->faker->regexify('[A-Za-z0-9]{400}'),
         ];
     }
 }

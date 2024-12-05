@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Shop extends Model
+class Name extends Model
 {
     use HasFactory;
 
@@ -16,8 +16,10 @@ class Shop extends Model
      * @var array
      */
     protected $fillable = [
-        'name',
-        'direction',
+        'first_name',
+        'second_first_name',
+        'first_surname',
+        'second_surname',
     ];
 
     /**
@@ -29,8 +31,8 @@ class Shop extends Model
         'id' => 'integer',
     ];
 
-    public function sellers(): HasMany
+    public function customer(): HasOne
     {
-        return $this->hasMany(Seller::class);
+        return $this->hasOne(Customer::class);
     }
 }

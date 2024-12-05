@@ -4,9 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Segmentation extends Model
+class Customer extends Model
 {
     use HasFactory;
 
@@ -16,7 +17,10 @@ class Segmentation extends Model
      * @var array
      */
     protected $fillable = [
-        'type',
+        'name_id',
+        'phone',
+        'email',
+        'is_frequent_customer',
     ];
 
     /**
@@ -26,10 +30,17 @@ class Segmentation extends Model
      */
     protected $casts = [
         'id' => 'integer',
+        'name_id' => 'integer',
+        'is_frequent_customer' => 'boolean',
     ];
 
-    public function customers(): BelongsToMany
+    public function name(): BelongsTo
     {
-        return $this->belongsToMany(Customer::class);
+        return $this->belongsTo(Name::class);
+    }
+
+    public function segmentations(): BelongsToMany
+    {
+        return $this->belongsToMany(Segmentation::class);
     }
 }

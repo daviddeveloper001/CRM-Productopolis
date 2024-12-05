@@ -4,16 +4,17 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use App\Models\ReturnAlert;
+use App\Models\Customer;
+use App\Models\Name;
 
-class ReturnAlertFactory extends Factory
+class CustomerFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = ReturnAlert::class;
+    protected $model = Customer::class;
 
     /**
      * Define the model's default state.
@@ -21,7 +22,10 @@ class ReturnAlertFactory extends Factory
     public function definition(): array
     {
         return [
-            'type' => $this->faker->randomElement(["Top","Medium","Low"]),
+            'name_id' => Name::factory(),
+            'phone' => $this->faker->phoneNumber(),
+            'email' => $this->faker->safeEmail(),
+            'is_frequent_customer' => $this->faker->boolean(),
         ];
     }
 }

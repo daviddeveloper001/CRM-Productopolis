@@ -4,9 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Shop extends Model
+class ItemsBuy extends Model
 {
     use HasFactory;
 
@@ -16,8 +15,7 @@ class Shop extends Model
      * @var array
      */
     protected $fillable = [
-        'name',
-        'direction',
+        'name_item',
     ];
 
     /**
@@ -28,9 +26,4 @@ class Shop extends Model
     protected $casts = [
         'id' => 'integer',
     ];
-
-    public function sellers(): HasMany
-    {
-        return $this->hasMany(Seller::class);
-    }
 }

@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             ShopSeeder::class,
             SellerSeeder::class,
             UserSeeder::class,
-            SegmentionSeeder::class,
+            SegmentationSeeder::class,
         ]);
     }
 }
