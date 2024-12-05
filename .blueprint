@@ -4,25 +4,35 @@ created:
     - database/factories/CityFactory.php
     - database/factories/ReturnAlertFactory.php
     - database/factories/ShopFactory.php
-    - database/migrations/2024_12_05_020848_create_payment_methods_table.php
-    - database/migrations/2024_12_05_020849_create_departments_table.php
-    - database/migrations/2024_12_05_020850_create_cities_table.php
-    - database/migrations/2024_12_05_020851_create_return_alerts_table.php
-    - database/migrations/2024_12_05_020852_create_shops_table.php
+    - database/factories/SellerFactory.php
+    - database/factories/SegmentationFactory.php
+    - database/migrations/2024_12_05_144204_create_payment_methods_table.php
+    - database/migrations/2024_12_05_144205_create_departments_table.php
+    - database/migrations/2024_12_05_144206_create_cities_table.php
+    - database/migrations/2024_12_05_144207_create_return_alerts_table.php
+    - database/migrations/2024_12_05_144208_create_shops_table.php
+    - database/migrations/2024_12_05_144209_create_sellers_table.php
+    - database/migrations/2024_12_05_144210_create_segmentations_table.php
     - app/Models/PaymentMethod.php
     - app/Models/Department.php
     - app/Models/City.php
     - app/Models/ReturnAlert.php
     - app/Models/Shop.php
+    - app/Models/Seller.php
+    - app/Models/Segmentation.php
     - database/seeders/PaymentMethodSeeder.php
     - database/seeders/DepartmentSeeder.php
     - database/seeders/CitySeeder.php
     - database/seeders/ReturnAlertSeeder.php
     - database/seeders/ShopSeeder.php
+    - database/seeders/SellerSeeder.php
+    - database/seeders/SegmentationSeeder.php
 models:
     User: { name: string, email: string, email_verified_at: 'timestamp nullable', password: string, remember_token: 'string:100 nullable' }
-    PaymentMethod: { method: 'string:400' }
-    Department: { name: 'string:400', relationships: { hasMany: City } }
-    City: { name: 'string:400', relationships: { belongsTo: Department } }
-    ReturnAlert: { status: 'enum:Top,Medium,Low' }
-    Shop: { name: 'string:400' }
+    PaymentMethod: { method: 'string:400 unique' }
+    Department: { name: 'string:400 unique', relationships: { hasMany: City } }
+    City: { name: 'string:400 unique', relationships: { belongsTo: Department } }
+    ReturnAlert: { status: 'enum:Top,Medium,Low unique' }
+    Shop: { name: 'string:400 unique', relationships: { hasMany: Seller } }
+    Seller: { name: 'string:400', last_name: 'string:400', relationships: { belongsTo: Shop } }
+    Segmentation: { type: 'string:400 unique' }

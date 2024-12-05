@@ -4,8 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Segmentation extends Model
+class Seller extends Model
 {
     use HasFactory;
 
@@ -15,7 +16,9 @@ class Segmentation extends Model
      * @var array
      */
     protected $fillable = [
-        'type',
+        'name',
+        'last_name',
+        'shop_id',
     ];
 
     /**
@@ -25,5 +28,11 @@ class Segmentation extends Model
      */
     protected $casts = [
         'id' => 'integer',
+        'shop_id' => 'integer',
     ];
+
+    public function shop(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class);
+    }
 }

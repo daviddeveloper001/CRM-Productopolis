@@ -1,21 +1,32 @@
 models:
   PaymentMethod:
-    method: string:400
+    method: string:400 unique
   
   Department:
-    name: string:400
+    name: string:400 unique
     relationships:
       hasMany: City
   
   City:
-    name: string:400
+    name: string:400 unique
     relationships:
       belongsTo: Department
 
   ReturnAlert:
-    status: enum:Top,Medium,Low
+    status: enum:Top,Medium,Low unique
 
   Shop:
-    name: string:400
+    name: string:400 unique
+    relationships:
+      hasMany: Seller
 
-seeders: PaymentMethod, Department, City, ReturnAlert, Shop
+  Seller:
+    name: string:400 
+    last_name: string:400
+    relationships:
+      belongsTo: Shop
+
+  Segmentation:
+    type: string:400 unique
+
+seeders: PaymentMethod, Department, City, ReturnAlert, Shop, Seller, Segmentation

@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payment_methods', function (Blueprint $table) {
+        Schema::create('return_alerts', function (Blueprint $table) {
             $table->id();
-            $table->string('method', 400);
+            $table->enum('status', ["Top","Medium","Low"])->unique();
             $table->timestamps();
         });
     }
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payment_methods');
+        Schema::dropIfExists('return_alerts');
     }
 };

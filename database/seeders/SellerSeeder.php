@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\Shop;
+use App\Models\Seller;
 use Illuminate\Database\Seeder;
 
-class ShopSeeder extends Seeder
+class SellerSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Shop::factory()->count(15)->create();
+        Seller::factory()->count(10)->create();
     }
 }
