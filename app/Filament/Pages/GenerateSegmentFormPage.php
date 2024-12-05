@@ -9,6 +9,7 @@ use App\Models\Department;
 use App\Models\ReturnAlert;
 use App\Models\Segmentation;
 use App\Models\PaymentMethod;
+use App\Models\Seller;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -137,9 +138,16 @@ class GenerateSegmentFormPage extends Page
                             '2xl' => 4,
                         ]),
 
-                    Select::make('segmentation_id')
+                    Select::make('seller_id')
                         ->label('Vendedor')
-                        ->options(Segmentation::all()->pluck('type', 'id'))
+                        ->searchable()
+                        ->preload()
+                        ->createOptionForm([
+                            TextInput::make('name')
+                                ->label('Vendedor')
+                                ->required(),
+                        ])
+                        ->options(Seller::all()->pluck('name', 'id'))
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,
@@ -171,5 +179,4 @@ class GenerateSegmentFormPage extends Page
     {
         return 'formData';
     }
-
 }
