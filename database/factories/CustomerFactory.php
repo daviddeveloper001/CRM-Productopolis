@@ -4,8 +4,8 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\City;
 use App\Models\Customer;
-use App\Models\Name;
 
 class CustomerFactory extends Factory
 {
@@ -22,10 +22,12 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         return [
-            'name_id' => Name::factory(),
+            'customer_name' => $this->faker->regexify('[A-Za-z0-9]{60}'),
+            'first_name' => $this->faker->firstName(),
             'phone' => $this->faker->phoneNumber(),
             'email' => $this->faker->safeEmail(),
             'is_frequent_customer' => $this->faker->boolean(),
+            'city_id' => City::factory(),
         ];
     }
 }

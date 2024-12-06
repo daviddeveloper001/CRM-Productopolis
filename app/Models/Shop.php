@@ -17,7 +17,6 @@ class Shop extends Model
      */
     protected $fillable = [
         'name',
-        'direction',
     ];
 
     /**
@@ -29,8 +28,8 @@ class Shop extends Model
         'id' => 'integer',
     ];
 
-    public function sellers(): HasMany
+    public function sales(): HasMany
     {
-        return $this->hasMany(Seller::class);
+        return $this->hasMany(Sale::class);
     }
 }

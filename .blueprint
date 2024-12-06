@@ -1,41 +1,31 @@
 created:
-    - database/factories/NameFactory.php
     - database/factories/DepartmentFactory.php
     - database/factories/CityFactory.php
     - database/factories/CustomerFactory.php
-    - database/factories/PaymentMethodFactory.php
     - database/factories/ShopFactory.php
     - database/factories/SellerFactory.php
-    - database/factories/OrderFactory.php
+    - database/factories/PaymentMethodFactory.php
     - database/factories/SegmentationFactory.php
-    - database/factories/ItemsBuyFactory.php
-    - database/factories/DetailOrdersFactory.php
     - database/factories/ReturnAlertFactory.php
-    - database/migrations/2024_12_05_212557_create_names_table.php
-    - database/migrations/2024_12_05_212558_create_departments_table.php
-    - database/migrations/2024_12_05_212559_create_cities_table.php
-    - database/migrations/2024_12_05_212600_create_customers_table.php
-    - database/migrations/2024_12_05_212601_create_payment_methods_table.php
-    - database/migrations/2024_12_05_212602_create_shops_table.php
-    - database/migrations/2024_12_05_212603_create_sellers_table.php
-    - database/migrations/2024_12_05_212604_create_orders_table.php
-    - database/migrations/2024_12_05_212605_create_segmentations_table.php
-    - database/migrations/2024_12_05_212606_create_items_buys_table.php
-    - database/migrations/2024_12_05_212607_create_detail_orders_table.php
-    - database/migrations/2024_12_05_212608_create_return_alerts_table.php
-    - database/migrations/2024_12_05_212609_create_customer_segmentation_table.php
-    - app/Models/Name.php
+    - database/factories/SaleFactory.php
+    - database/migrations/2024_12_06_034907_create_departments_table.php
+    - database/migrations/2024_12_06_034908_create_cities_table.php
+    - database/migrations/2024_12_06_034909_create_customers_table.php
+    - database/migrations/2024_12_06_034910_create_shops_table.php
+    - database/migrations/2024_12_06_034911_create_sellers_table.php
+    - database/migrations/2024_12_06_034912_create_payment_methods_table.php
+    - database/migrations/2024_12_06_034913_create_segmentations_table.php
+    - database/migrations/2024_12_06_034914_create_return_alerts_table.php
+    - database/migrations/2024_12_06_034915_create_sales_table.php
     - app/Models/Department.php
     - app/Models/City.php
     - app/Models/Customer.php
-    - app/Models/PaymentMethod.php
     - app/Models/Shop.php
     - app/Models/Seller.php
-    - app/Models/Order.php
+    - app/Models/PaymentMethod.php
     - app/Models/Segmentation.php
-    - app/Models/ItemsBuy.php
-    - app/Models/DetailOrders.php
     - app/Models/ReturnAlert.php
+    - app/Models/Sale.php
     - database/seeders/PaymentMethodSeeder.php
     - database/seeders/DepartmentSeeder.php
     - database/seeders/CitySeeder.php
@@ -44,16 +34,13 @@ created:
     - database/seeders/SellerSeeder.php
     - database/seeders/SegmentationSeeder.php
 models:
-    User: {  }
-    Name: { first_name: string, second_first_name: string, first_surname: string, second_surname: string, relationships: { hasOne: Customer } }
-    Department: { name: 'string:400 unique', relationships: { hasMany: City } }
-    City: { name: 'string:400 unique', department_id: unsignedInteger, relationships: { belongsTo: Department } }
-    Customer: { name_id: unsignedInteger, phone: 'string:400', email: 'string:400 unique', is_frequent_customer: 'boolean default false', relationships: { belongsTo: Name, belongsToMany: Segmentation } }
-    PaymentMethod: { method: 'string:400 unique' }
-    Shop: { name: 'string:400 unique', direction: 'string:400', relationships: { hasMany: Seller } }
-    Seller: { name: 'string:400', last_name: 'string:400', shop_id: unsignedInteger, relationships: { belongsTo: Shop } }
-    Order: { first_order_date: date, last_order_date: date, last_order_date_delivered: date, seller_id: unsignedInteger, shop_id: unsignedInteger, payment_method_id: unsignedInteger, total_order: 'decimal:10,2', total_entries: 'decimal:10,2', total_returns: 'decimal:10,2', total_sales: 'decimal:10,2', total_revenues: 'decimal:10,2', return_value: 'decimal:10,2', days_since_last_purchase: integer, relationships: { belongsTo: 'Shop, Seller, PaymentMethod' } }
-    Segmentation: { type: 'string:400 unique', relationships: { belongsToMany: Customer } }
-    ItemsBuy: { name_item: 'string:400' }
-    DetailOrders: { order_id: unsignedInteger, item_id: unsignedInteger, quantity: integer, price: 'decimal:10,2', relationships: { belongsTo: 'Order, ItemsBuy' } }
-    ReturnAlert: { type: 'enum:Top,Medium,Low unique' }
+    User: { name: string, email: string, email_verified_at: 'timestamp nullable', password: string, remember_token: 'string:100 nullable' }
+    Department: { name: 'string:60 unique', relationships: { hasMany: City } }
+    City: { name: 'string:50 unique', department_id: unsignedInteger, relationships: { belongsTo: Department, hasMany: Customer } }
+    Customer: { customer_name: 'string:60', first_name: 'string:60', phone: 'string:50 nullable', email: 'string:100 unique', is_frequent_customer: 'boolean default false', city_id: unsignedInteger, relationships: { belongsTo: City, hasMany: Sale } }
+    Shop: { name: 'string:60 unique', relationships: { hasMany: Sale } }
+    Seller: { name: 'string:70' }
+    PaymentMethod: { name: 'string:50 unique' }
+    Segmentation: { type: 'string:50 unique', relationships: { hasMany: Sale } }
+    ReturnAlert: { type: 'string:50 unique', relationships: { hasMany: Sale } }
+    Sale: { order_date: date, last_order_date_delivered: date, total_sales: 'decimal:10,2', total_revenues: 'decimal:10,2', orders_number: integer, number_entries: integer, returns_number: integer, return_value: 'decimal:10,2', last_days_purchase_days: integer, last_item_purchased: 'string:60', customer_id: unsignedInteger, shop_id: unsignedInteger, seller_id: unsignedInteger, method_id: unsignedInteger, segmentation_id: unsignedInteger, return_alert_id: unsignedInteger, relationships: { belongsTo: 'Customer, Shop, Seller, PaymentMethod, Segmentation, ReturnAlert' } }

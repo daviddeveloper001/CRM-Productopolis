@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sellers', function (Blueprint $table) {
+        Schema::create('segmentations', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 400);
-            $table->string('last_name', 400);
-            $table->foreignId('shop_id')->constrained();
+            $table->string('type', 50)->unique();
             $table->timestamps();
         });
     }
@@ -25,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sellers');
+        Schema::dropIfExists('segmentations');
     }
 };

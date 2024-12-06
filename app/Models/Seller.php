@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Seller extends Model
 {
@@ -17,8 +16,6 @@ class Seller extends Model
      */
     protected $fillable = [
         'name',
-        'last_name',
-        'shop_id',
     ];
 
     /**
@@ -28,11 +25,5 @@ class Seller extends Model
      */
     protected $casts = [
         'id' => 'integer',
-        'shop_id' => 'integer',
     ];
-
-    public function shop(): BelongsTo
-    {
-        return $this->belongsTo(Shop::class);
-    }
 }

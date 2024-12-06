@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customer_segmentation', function (Blueprint $table) {
-            $table->foreignId('customer_id')->constrained();
-            $table->foreignId('segmentation_id')->constrained();
+        Schema::create('sellers', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 70);
+            $table->timestamps();
         });
     }
 
@@ -22,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customer_segmentation');
+        Schema::dropIfExists('sellers');
     }
 };

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Segmentation extends Model
 {
@@ -28,8 +28,8 @@ class Segmentation extends Model
         'id' => 'integer',
     ];
 
-    public function customers(): BelongsToMany
+    public function sales(): HasMany
     {
-        return $this->belongsToMany(Customer::class);
+        return $this->hasMany(Sale::class);
     }
 }

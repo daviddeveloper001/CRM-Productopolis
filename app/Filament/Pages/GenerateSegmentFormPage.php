@@ -62,7 +62,7 @@ class GenerateSegmentFormPage extends Page
                         ]),
                     Select::make('method')
                         ->label('Método de pago')
-                        ->options(PaymentMethod::all()->pluck('method', 'id'))
+                        ->options(PaymentMethod::all()->pluck('name', 'id'))
                         //->searchable()
                         ->preload()
                         ->columnSpan([
@@ -73,9 +73,7 @@ class GenerateSegmentFormPage extends Page
 
                     Select::make('alert_id')
                         ->label('Alertas de devolución')
-                        ->enum(AlertEnum::class)
-                        ->options(AlertEnum::class)
-                        //->options(ReturnAlert::all()->pluck('status', 'id'))
+                        ->options(ReturnAlert::all()->pluck('type', 'id'))
                         ->preload()
                         ->columnSpan([
                             'sm' => 2,

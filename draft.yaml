@@ -1,82 +1,68 @@
 models:
-  Name:
-    first_name: string
-    second_first_name: string
-    first_surname: string
-    second_surname: string
-    relationships:
-      hasOne: Customer
-
   Department:
-    name: string:400 unique
+    name: string:60 unique
     relationships:
       hasMany: City
-    
+
   City:
-    name: string:400 unique
+    name: string:50 unique
     department_id: unsignedInteger
     relationships:
       belongsTo: Department
+      hasMany: Customer
 
   Customer:
-    name_id: unsignedInteger
-    phone: string:400
-    email: string:400 unique
+    customer_name: string:60
+    first_name: string:60
+    phone: string:50 nullable
+    email: string:100 unique
     is_frequent_customer: boolean default false
+    city_id: unsignedInteger
     relationships:
-      belongsTo: Name
-      belongsToMany: Segmentation
-
-
-  PaymentMethod:
-    method: string:400 unique
+      belongsTo: City
+      hasMany: Sale
 
   Shop:
-    name: string:400 unique
+    name: string:60 unique
     relationships:
-      hasMany: Seller
+      hasMany: Sale 
 
   Seller:
-    name: string:400 
-    last_name: string:400
-    shop_id: unsignedInteger
-    relationships:
-      belongsTo: Shop
+    name: string:70
 
-  Order:
-    first_order_date: date
-    last_order_date: date
-    last_order_date_delivered: date
-    seller_id: unsignedInteger
-    shop_id: unsignedInteger   
-    payment_method_id: unsignedInteger
-    total_order: decimal:10,2
-    total_entries: decimal:10,2
-    total_returns: decimal:10,2
-    total_sales: decimal:10,2
-    total_revenues: decimal:10,2
-    return_value: decimal:10,2
-    days_since_last_purchase: integer
-    relationships:
-      belongsTo: Shop, Seller, PaymentMethod
+  PaymentMethod:
+    name: string:50 unique   
 
   Segmentation:
-    type: string:400 unique
+    type: string:50 unique
     relationships:
-      belongsToMany: Customer
-
-  ItemsBuy: 
-    name_item: string:400
-
-  DetailOrders:
-    order_id: unsignedInteger
-    ItemsBuy_id: unsignedInteger
-    quantity: integer
-    price: decimal:10,2
-    relationships:
-      belongsTo: Order, ItemsBuy
+      hasMany: Sale
 
   ReturnAlert:
-    type: enum:Top,Medium,Low unique
+    type: string:50 unique
+    relationships:
+      hasMany: Sale
+    
+  Sale:
+    order_date: date
+    last_order_date_delivered: date
+    total_sales: decimal:10,2
+    total_revenues: decimal:10,2
+    orders_number: integer
+    number_entries: integer
+    returns_number: integer
+    return_value: decimal:10,2
+    last_days_purchase_days: integer
+    last_item_purchased: string:60
+    customer_id: unsignedInteger
+    shop_id: unsignedInteger
+    seller_id: unsignedInteger
+    method_id: unsignedInteger
+    segmentation_id: unsignedInteger
+    return_alert_id: unsignedInteger
+    relationships:
+      belongsTo: Customer, Shop, Seller, PaymentMethod, Segmentation, ReturnAlert
+
+  
 
 seeders: PaymentMethod, Department, City, ReturnAlert, Shop, Seller, Segmentation

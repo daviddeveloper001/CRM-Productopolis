@@ -21,7 +21,7 @@ class PaymentMethodFactory extends Factory
     public function definition(): array
     {
         return [
-            'method' => $this->faker->regexify('[A-Za-z0-9]{400}'),
+            'name' => $this->faker->name(),
         ];
     }
 }

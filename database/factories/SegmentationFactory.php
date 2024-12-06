@@ -21,7 +21,7 @@ class SegmentationFactory extends Factory
     public function definition(): array
     {
         return [
-            'type' => $this->faker->regexify('[A-Za-z0-9]{400}'),
+            'type' => $this->faker->regexify('[A-Za-z0-9]{50}'),
         ];
     }
 }

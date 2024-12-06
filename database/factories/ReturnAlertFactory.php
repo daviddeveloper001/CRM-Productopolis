@@ -21,7 +21,7 @@ class ReturnAlertFactory extends Factory
     public function definition(): array
     {
         return [
-            'type' => $this->faker->randomElement(["Top","Medium","Low"]),
+            'type' => $this->faker->regexify('[A-Za-z0-9]{50}'),
         ];
     }
 }
