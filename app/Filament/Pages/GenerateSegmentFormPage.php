@@ -34,17 +34,67 @@ class GenerateSegmentFormPage extends Page
 
     public function submit(): void
     {
-        $payment_method_id = $this->formData["payment_method_id"];
-
-
-
-            $sales = Sale::with(['paymentMethod'])
-            ->where('payment_method_id', $payment_method_id)
-            ->get();
-
-
-            dd($sales);
+        // Captura y limpieza de los datos del formulario
+        $daysFromPurchase = $this->formData["days_from_purchase"] ?? null;
+        $upDaysFromPurchase = $this->formData["up_to_days_from_purchase"] ?? null;
+        $paymentMethodId = $this->formData["payment_method_id"] ?? null;
+        $alertId = $this->formData["alert"] ?? null;
+        $departmentId = $this->formData["department_id"] ?? null;
+        $cityId = $this->formData["city_id"] ?? null;
+        $limit = $this->formData["limit"] ?? null;
+        $segmentationId = $this->formData["segmentation_id"] ?? null;
+        $sellerId = $this->formData["seller_id"] ?? null;
+        $shopId = $this->formData["shop_id"] ?? null;
+    
+        // Construir la consulta dinámicamente
+        $query = Sale::with(['customer', 'paymentMethod', 'shop', 'seller', 'segmentation', 'returnAlert']);
+    
+        // Agrega solo las cláusulas que tienen valor
+        if (!is_null($paymentMethodId)) {
+            $query->where('payment_method_id', $paymentMethodId);
+        }
+    
+        if (!is_null($alertId)) {
+            $query->where('return_alert_id', $alertId);
+        }
+    
+        if (!is_null($departmentId)) {
+            $query->where('department_id', $departmentId);
+        }
+    
+        if (!is_null($cityId)) {
+            $query->where('city_id', $cityId);
+        }
+    
+        if (!is_null($segmentationId)) {
+            $query->where('segmentation_id', $segmentationId);
+        }
+    
+        if (!is_null($sellerId)) {
+            $query->where('seller_id', $sellerId);
+        }
+    
+        if (!is_null($shopId)) {
+            $query->where('shop_id', $shopId);
+        }
+    
+        // Filtro por días desde la compra (rango de fechas)
+        if (!is_null($daysFromPurchase) && !is_null($upDaysFromPurchase)) {
+            $query->whereBetween('created_at', [now()->subDays($upDaysFromPurchase), now()->subDays($daysFromPurchase)]);
+        }
+    
+        // Aplica un límite si se especifica
+        if (!is_null($limit)) {
+            $query->limit($limit);
+        }
+    
+        // Ejecuta la consulta y obtiene los resultados
+        $sales = $query->get();
+    
+        // Depurar resultados
+        dd($sales);
     }
+    
 
     protected function getFormSchema(): array
     {
@@ -56,7 +106,7 @@ class GenerateSegmentFormPage extends Page
                     '2xl' => 8,
                 ])
                 ->schema([
-                    TextInput::make('dias_desde_compra')
+                    TextInput::make('days_from_purchase')
                         ->label('Días desde Compra')
                         ->columnSpan([
                             'sm' => 2,

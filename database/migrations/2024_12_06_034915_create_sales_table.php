@@ -26,7 +26,6 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained();
             $table->foreignId('shop_id')->constrained();
             $table->foreignId('seller_id')->constrained();
-            $table->unsignedInteger('method_id')->constrained();
             $table->foreignId('segmentation_id')->constrained();
             $table->foreignId('return_alert_id')->constrained();
             $table->foreignId('payment_method_id')->constrained();
