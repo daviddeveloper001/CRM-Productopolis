@@ -31,10 +31,8 @@ models:
   PaymentMethod:
     method: string:400 unique
 
-
   Shop:
     name: string:400 unique
-    direction: string:400
     relationships:
       hasMany: Seller
 
