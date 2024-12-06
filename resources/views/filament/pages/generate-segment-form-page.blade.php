@@ -1,6 +1,10 @@
 <x-filament-panels::page>
-    {{ $this->form }}
-    <x-filament::button wire:click="submit" class="btn-primary">
-        Generar segmento
-    </x-filament::button>
+    <form wire:submit="submit">
+        {{ $this->form }}
+        
+        {{ $this->submitAction }}
+
+        <x-filament-actions::modals/>
+    </form>
+
 </x-filament-panels::page>

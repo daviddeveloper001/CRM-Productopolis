@@ -27,8 +27,6 @@ class CrmController extends Controller
     {
         $datos = $request->all();
 
-
-
         DB::transaction(function () use ($datos) {
 
             foreach ($datos['data'] as $registro) {
@@ -92,6 +90,9 @@ class CrmController extends Controller
                     "last_days_purchase_days" => $registro['dias_ultima_compra'],
                     "last_item_purchased" => $registro['ultimo_item_comprado'], 
                 ]);
+
+
+                response()->json($sale);
 
             }
         });
