@@ -12,6 +12,7 @@ use App\Models\ReturnAlert;
 use App\Models\Segmentation;
 use App\Models\PaymentMethod;
 use App\Enum\PaymentMethodEnum;
+use App\Models\Sale;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -33,7 +34,16 @@ class GenerateSegmentFormPage extends Page
 
     public function submit(): void
     {
-        
+        $payment_method_id = $this->formData["payment_method_id"];
+
+
+
+            $sales = Sale::with(['paymentMethod'])
+            ->where('payment_method_id', $payment_method_id)
+            ->get();
+
+
+            dd($sales);
     }
 
     protected function getFormSchema(): array
@@ -60,7 +70,7 @@ class GenerateSegmentFormPage extends Page
                             'xl' => 3,
                             '2xl' => 4,
                         ]),
-                    Select::make('method')
+                    Select::make('payment_method_id')
                         ->label('Método de pago')
                         ->options(PaymentMethod::all()->pluck('name', 'id'))
                         //->searchable()

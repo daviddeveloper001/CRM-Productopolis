@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Models\City;
+use App\Models\Sale;
+use App\Models\Shop;
+use App\Models\Seller;
+use App\Models\Customer;
+use App\Models\Department;
+use App\Models\ReturnAlert;
+use App\Models\Segmentation;
 use Illuminate\Http\Request;
 use App\Models\PaymentMethod;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
-use App\Models\Seller;
-use App\Models\Shop;
 
 class CrmController extends Controller
 {
@@ -27,21 +32,67 @@ class CrmController extends Controller
         DB::transaction(function () use ($datos) {
 
             foreach ($datos['data'] as $registro) {
-                // Buscar o crear método de pago
-                $metodoPago = PaymentMethod::firstOrCreate(['method' => $registro['metodo_pago']]);
 
-                // Buscar o crear cliente
-                $tienda = Shop::firstOrCreate(
+                $department = Department::firstOrCreate(
+                    ['name' => $registro['departamento']]
+                );
+
+                $city = City::firstOrCreate(
+                    [
+                        'name' => $registro['ciudad'],
+                        'department_id' => $department->id
+                    ]
+                );
+
+                $customer = Customer::firstOrCreate(
+                    [
+                        'customer_name' => $registro['nombre_cliente'],
+                        'first_name' => $registro['primer_nombre'],
+                        'phone' => $registro['telefono'],
+                        'email' => $registro['correo'],
+                        'city_id' => $city->id
+                    ]
+                );
+
+                $shop = Shop::firstOrCreate(
                     ['name' => $registro['tienda']]
                 );
 
+                $seller = Seller::firstOrCreate(
+                    [
+                        'name' => $registro['vendedor'],
+                    ]
+                );
 
-                // Buscar o crear vendedor
-                $vendedor = Seller::firstOrCreate([
-                    'name' => $registro['vendedor'],
-                    'last_name' => $registro['vendedor'],
-                    'shop_id' => $tienda->id,
+                $paymentMethod = PaymentMethod::firstOrCreate(['name' => $registro['metodo_pago']]);
+
+                $segmentation = Segmentation::firstOrCreate(
+                    ['type' => $registro['segmentacion']]
+                );
+
+                $returnAlert = ReturnAlert::firstOrCreate(
+                    ['type' => $registro['alerta_devolucion']]
+                );
+
+                $sale = Sale::create([
+                    'customer_id' => $customer->id,
+                    'shop_id' => $shop->id,
+                    'seller_id' => $seller->id,
+                    'payment_method_id' => $paymentMethod->id,
+                    'segmentation_id' => $segmentation->id,
+                    'return_alert_id' => $returnAlert->id,
+                    "order_date" => $registro['fecha_primera_orden'],
+                    "last_order_date_delivered" => $registro['fecha_ultima_orden'],
+                    "total_sales" => $registro['ventas'],
+                    "total_revenues" => $registro['ingresos'],
+                    "orders_number" => $registro['ordenes'],
+                    "number_entries" => $registro['entregadas'],
+                    "returns_number" => $registro['devoluciones'],
+                    "return_value" => $registro['valor_devolucion'],
+                    "last_days_purchase_days" => $registro['dias_ultima_compra'],
+                    "last_item_purchased" => $registro['ultimo_item_comprado'], 
                 ]);
+
             }
         });
     }
