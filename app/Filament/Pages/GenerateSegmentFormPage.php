@@ -6,13 +6,13 @@ use App\Models\City;
 use App\Models\Sale;
 use App\Models\Shop;
 use App\Models\Seller;
-use App\Enum\AlertEnum;
 use Filament\Pages\Page;
 use App\Models\Department;
 use App\Models\ReturnAlert;
 use App\Models\Segmentation;
 use Filament\Actions\Action;
 use App\Models\PaymentMethod;
+use Faker\Provider\ar_EG\Payment;
 use Illuminate\Contracts\View\View;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
@@ -78,6 +78,7 @@ class GenerateSegmentFormPage extends Page
         return $query->get();
     }
 
+
     public function submitAction(): Action
     {
         return Action::make('submit')
@@ -88,12 +89,30 @@ class GenerateSegmentFormPage extends Page
             ->modalContent(fn(): View => view(
                 'filament.pages.modal-segmentation',
                 [
-                    'customersByPaymentMethod' => $this->getCustomersByPaymentMethod(),
-                    'customersByShop' => $this->getCustomersByShop(),
-                    'getCustomersByAlert' => $this->getCustomersByAlert(),
-                    'getCustomersBySeller' => $this->getCustomersBySeller(),
-                    'getCustomersBySegmentation' => $this->getCustomersBySegmentation(),
-                    'customersByCity' => $this->getCustomersByCity(),
+                    'customersByPaymentMethod' => [
+                        'query' => $this->getCustomersByPaymentMethod()['query'],
+                        'payments' => $this->getCustomersByPaymentMethod()['payments']
+                    ],
+                    'customersByShop' => [
+                        'query' => $this->getCustomersByShop()['query'],
+                        'shops' => $this->getCustomersByShop()['shops']
+                    ],
+                    'getCustomersByAlert' => [
+                        'query' => $this->getCustomersByAlert()['query'],
+                        'alerts' => $this->getCustomersByAlert()['alerts']
+                    ],
+                    'getCustomersBySeller' => [
+                        'query' => $this->getCustomersBySeller()['query'],
+                        'sellers' => $this->getCustomersBySeller()['sellers']
+                    ],
+                    'getCustomersBySegmentation' => [
+                        'query' => $this->getCustomersBySegmentation()['query'],
+                        'segmentations' => $this->getCustomersBySegmentation()['segmentations']
+                    ],
+                    'customersByCity' => [
+                        'query' => $this->getCustomersByCity()['query'],
+                        'cities' => $this->getCustomersByCity()['cities']
+                    ],
                 ]
             ))
             ->modalHeading('Información del segmento')
@@ -105,45 +124,81 @@ class GenerateSegmentFormPage extends Page
     {
         $paymentMethodId = $this->formData["payment_method_id"] ?? null;
 
+        $payments = PaymentMethod::withCount(['sales as customers_count' => function ($query) {
+            $query->distinct('customer_id');
+        }])->get();
+
         if (is_null($paymentMethodId)) {
-            return collect(); // Si no hay selección, devolver colección vacía.
+            return [
+                'query' => collect(),
+                'payments' => $payments,
+            ]; // Retorna una colección vacía pero con las segmentaciones.
         }
 
-        // Filtramos las ventas por método de pago y obtenemos los clientes
-        return Sale::where('payment_method_id', $paymentMethodId)
-            ->with('customer') // Nos aseguramos de cargar la relación con clientes
+        // Obtener los clientes específicos de la segmentación seleccionada
+        $query = Sale::where('payment_method_id', $paymentMethodId)
+            ->with('customer') // Cargar la relación con clientes
             ->get()
-            ->pluck('customer'); // Obtenemos solo los clientes
+            ->pluck('customer');
+
+        return [
+            'query' => $query,
+            'payments' => $payments,
+        ];
     }
 
     protected function getCustomersByAlert()
     {
         $alertId = $this->formData["alert_id"] ?? null;
 
+        $alerts = ReturnAlert::withCount(['sales as customers_count' => function ($query) {
+            $query->distinct('customer_id');
+        }])->get();
+
         if (is_null($alertId)) {
-            return collect(); // Si no hay selección, devolver colección vacía.
+            return [
+                'query' => collect(),
+                'alerts' => $alerts,
+            ]; // Retorna una colección vacía pero con las segmentaciones.
         }
 
-        // Filtramos las ventas por método de pago y obtenemos los clientes
-        return Sale::where('return_alert_id', $alertId)
-            ->with('customer') // Nos aseguramos de cargar la relación con clientes
+        // Obtener los clientes específicos de la segmentación seleccionada
+        $query = Sale::where('return_alert_id', $alertId)
+            ->with('customer') // Cargar la relación con clientes
             ->get()
-            ->pluck('customer'); // Obtenemos solo los clientes
+            ->pluck('customer');
+
+        return [
+            'query' => $query,
+            'alerts' => $alerts,
+        ];
     }
 
     protected function getCustomersBySeller()
     {
         $sellerId = $this->formData["seller_id"] ?? null;
 
+        $sellers = Seller::withCount(['sales as customers_count' => function ($query) {
+            $query->distinct('customer_id');
+        }])->get();
+
         if (is_null($sellerId)) {
-            return collect(); // Si no hay selección, devolver colección vacía.
+            return [
+                'query' => collect(),
+                'sellers' => $sellers,
+            ]; // Retorna una colección vacía pero con las segmentaciones.
         }
 
-        // Filtramos las ventas por tienda y obtenemos los clientes
-        return Sale::where('seller_id', $sellerId)
-            ->with('customer') // Nos aseguramos de cargar la relación con clientes
+        // Obtener los clientes específicos de la segmentación seleccionada
+        $query = Sale::where('segmentation_id', $sellerId)
+            ->with('customer') // Cargar la relación con clientes
             ->get()
-            ->pluck('customer'); // Obtenemos solo los clientes
+            ->pluck('customer');
+
+        return [
+            'query' => $query,
+            'sellers' => $sellers,
+        ];
     }
 
 
@@ -152,52 +207,106 @@ class GenerateSegmentFormPage extends Page
     {
         $segmentationId = $this->formData["segmentation_id"] ?? null;
 
+        $segmentations = Segmentation::withCount(['sales as customers_count' => function ($query) {
+            $query->distinct('customer_id');
+        }])->get();
+
         if (is_null($segmentationId)) {
-            return collect(); // Si no hay selección, devolver colección vacía.
+            return [
+                'query' => collect(),
+                'segmentations' => $segmentations,
+            ]; // Retorna una colección vacía pero con las segmentaciones.
         }
 
-        // Filtramos las ventas por tienda y obtenemos los clientes
-        return Sale::where('segmentation_id', $segmentationId)
-            ->with('customer') // Nos aseguramos de cargar la relación con clientes
+        // Obtener los clientes específicos de la segmentación seleccionada
+        $query = Sale::where('segmentation_id', $segmentationId)
+            ->with('customer') // Cargar la relación con clientes
             ->get()
-            ->pluck('customer'); // Obtenemos solo los clientes
+            ->pluck('customer');
+
+        return [
+            'query' => $query,
+            'segmentations' => $segmentations,
+        ];
     }
 
 
     protected function getCustomersByShop()
     {
+
         $shopId = $this->formData["shop_id"] ?? null;
 
+        $shops = Shop::withCount(['sales as customers_count' => function ($query) {
+            $query->distinct('customer_id');
+        }])->get();
+
         if (is_null($shopId)) {
-            return collect(); // Si no hay selección, devolver colección vacía.
+            return [
+                'query' => collect(),
+                'shops' => $shops,
+            ]; // Retorna una colección vacía pero con las segmentaciones.
         }
 
-        // Filtramos las ventas por tienda y obtenemos los clientes
-        return Sale::where('shop_id', $shopId)
-            ->with('customer') // Nos aseguramos de cargar la relación con clientes
+        $query = Sale::where('shop_id', $shopId)
+            ->with('customer') // Cargar la relación con clientes
             ->get()
-            ->pluck('customer'); // Obtenemos solo los clientes
+            ->pluck('customer');
+
+        return [
+            'query' => $query,
+            'shops' => $shops,
+        ];
     }
 
 
     protected function getCustomersByCity()
     {
+        // Obtener el ID de la ciudad desde el formulario
         $cityId = $this->formData["city_id"] ?? null;
 
+        // Si no hay ciudad seleccionada, devolver una colección vacía
         if (is_null($cityId)) {
-            return collect(); // Si no hay selección, devolver colección vacía.
+            return [
+                'query' => collect(),
+                'cities' => collect(), // Puedes obtener una lista de ciudades si lo necesitas
+            ];
         }
 
-        $city = City::where('id', $cityId)->first();
+        // Consultar la ciudad y cargar la relación con sus clientes
+        $city = City::with(['customers.sales' => function ($query) {
+            $query->distinct('customer_id'); // Solo ventas únicas por cliente
+        }])->find($cityId);
 
-        $city->customers;
+        if (!$city) {
+            return [
+                'query' => collect(),
+                'cities' => collect(),
+            ];
+        }
 
-        // Filtramos las ventas por tienda y obtenemos los clientes
-        return Sale::where('customer_id', $cityId)
-            ->with('customer.city') // Nos aseguramos de cargar la relación con clientes
+        // Preparar el conteo de clientes únicos por ciudad
+        $customersCount = $city->customers->filter(function ($customer) {
+            return $customer->sales->isNotEmpty();
+        })->count();
+
+        // Obtener los clientes que han realizado compras
+        $customers = Sale::whereIn('customer_id', $city->customers->pluck('id'))
+            ->with('customer') // Cargar relación de cliente
             ->get()
-            ->pluck('customer'); // Obtenemos solo los clientes
+            ->pluck('customer')
+            ->unique('id'); // Clientes únicos
+
+        return [
+            'query' => $customers, // Lista de clientes que han comprado
+            'cities' => [
+                [
+                    'name' => $city->name,
+                    'customers_count' => $customersCount,
+                ],
+            ], // Información para mostrar clientes únicos por ciudad
+        ];
     }
+
 
 
 
@@ -251,11 +360,6 @@ class GenerateSegmentFormPage extends Page
                         ->label('Departamento')
                         //->searchable()
                         ->preload()
-                        ->createOptionForm([
-                            TextInput::make('name')
-                                ->label('Departamento')
-                                ->required(),
-                        ])
                         ->options(Department::all()->pluck('name', 'id'))
                         ->columnSpan([
                             'sm' => 2,
@@ -267,11 +371,6 @@ class GenerateSegmentFormPage extends Page
                         ->label('Ciudad')
                         //->searchable()
                         ->preload()
-                        ->createOptionForm([
-                            TextInput::make('name')
-                                ->label('Ciudad')
-                                ->required(),
-                        ])
                         ->options(City::all()->pluck('name', 'id'))
                         ->columnSpan([
                             'sm' => 2,
@@ -290,11 +389,6 @@ class GenerateSegmentFormPage extends Page
                         ->label('Segmento')
                         //->searchable()
                         ->preload()
-                        ->createOptionForm([
-                            TextInput::make('name')
-                                ->label('Método de pago')
-                                ->required(),
-                        ])
                         ->options(Segmentation::all()->pluck('type', 'id'))
                         ->columnSpan([
                             'sm' => 2,
@@ -306,11 +400,6 @@ class GenerateSegmentFormPage extends Page
                         ->label('Vendedor')
                         //->searchable()
                         ->preload()
-                        ->createOptionForm([
-                            TextInput::make('name')
-                                ->label('Vendedor')
-                                ->required(),
-                        ])
                         ->options(Seller::all()->pluck('name', 'id'))
                         ->columnSpan([
                             'sm' => 2,
@@ -322,11 +411,6 @@ class GenerateSegmentFormPage extends Page
                         ->label('Tienda')
                         //->searchable()
                         ->preload()
-                        ->createOptionForm([
-                            TextInput::make('name')
-                                ->label('Tienda')
-                                ->required(),
-                        ])
                         ->options(Shop::all()->pluck('name', 'id'))
                         ->columnSpan([
                             'sm' => 2,

@@ -1,70 +1,93 @@
 <div>
-    <h2 class="text-lg font-bold">Clientes por Método de Pago</h2>
-    @if ($customersByPaymentMethod->isEmpty())
-        <p>No se encontraron clientes para esta selección.</p>
-    @else
+    @if (!$customersByPaymentMethod['query']->isEmpty())
+        <h2 class="text-lg font-bold">Clientes por Método de Pago</h2>
+
         <ul class="list-disc list-inside">
-            @foreach ($customersByPaymentMethod as $customer)
-                <li>{{ $customer->name }} ({{ $customer->email }})</li>
+
+            @foreach ($customersByPaymentMethod['payments'] as $payment)
+                @if ($payment->customers_count != 0)
+                    <li>
+                        <strong>{{ $payment->name }}</strong>:
+                        {{ $payment->customers_count ?? 0 }} clientes
+                    </li>
+                @endif
             @endforeach
         </ul>
     @endif
 
-    <h2 class="text-lg font-bold mt-6">Clientes por Alertas</h2>
-    @if ($getCustomersByAlert->isEmpty())
-        <p>No se encontraron clientes para esta selección.</p>
-    @else
+    @if (!$getCustomersByAlert['query']->isEmpty())
+        <h2 class="text-lg font-bold mt-6">Clientes por Alertas</h2>
         <ul class="list-disc list-inside">
-            @foreach ($getCustomersByAlert as $customer)
-                <li>{{ $customer->name }} ({{ $customer->email }})</li>
+            @foreach ($getCustomersByAlert['alerts'] as $alert)
+                @if ($alert->customers_count != 0)
+                    <li>
+                        <strong>{{ $alert->type }}</strong>:
+                        {{ $alert->customers_count ?? 0 }} clientes
+                    </li>
+                @endif
+            @endforeach
+        </ul>
+
+    @endif
+
+
+    @if (!$getCustomersBySeller['query']->isEmpty())
+        <h2 class="text-lg font-bold mt-6">Clientes por Vendedor</h2>
+        <ul class="list-disc list-inside">
+
+            @foreach ($getCustomersBySeller['sellers'] as $seller)
+                @if ($seller->customers_count != 0)
+                    <li>
+                        <strong>{{ $seller->name }}</strong>:
+                        {{ $seller->customers_count ?? 0 }} clientes
+                    </li>
+                @endif
+            @endforeach
+        </ul>
+
+    @endif
+
+    @if (!$getCustomersBySegmentation['query']->isEmpty())
+        <h2 class="text-lg font-bold mt-6">Clientes por Segmentación</h2>
+        <ul class="list-disc list-inside">
+            @foreach ($getCustomersBySegmentation['segmentations'] as $segmentation)
+                @if ($segmentation->customers_count != 0)
+                    <li>
+                        <strong>{{ $segmentation->type }}</strong>:
+                        {{ $segmentation->customers_count ?? 0 }} clientes
+                    </li>
+                @endif
             @endforeach
         </ul>
     @endif
 
 
-    <h2 class="text-lg font-bold mt-6">Clientes por Vendedor</h2>
-    @if ($getCustomersBySeller->isEmpty())
-        <p>No se encontraron clientes para esta selección.</p>
-    @else
+    @if (!$customersByCity['query']->isEmpty())
+        <h2 class="text-lg font-bold mt-6">Clientes por Ciudad</h2>
         <ul class="list-disc list-inside">
-            @foreach ($getCustomersBySeller as $customer)
-                <li>{{ $customer->name }} ({{ $customer->email }})</li>
+            @foreach ($customersByCity['cities'] as $city)
+                @if ($city['customers_count'] != 0)
+                    <li>
+                        <strong>{{ $city['name'] }}</strong>:
+                        {{ $city['customers_count'] ?? 0 }} clientes
+                    </li>
+                @endif
             @endforeach
         </ul>
     @endif
 
-    <h2 class="text-lg font-bold mt-6">Clientes por Segmentación</h2>
-    @if ($getCustomersBySegmentation->isEmpty())
-        <p>No se encontraron clientes para esta selección.</p>
-    @else
-        <ul class="list-disc list-inside">
-            @foreach ($getCustomersBySegmentation as $customer)
-                <li>{{ $customer->name }} ({{ $customer->email }})</li>
-            @endforeach
-        </ul>
-    @endif
 
-    <h2 class="text-lg font-bold mt-6">Clientes por Tienda</h2>
-    @if ($customersByShop->isEmpty())
-        <p>No se encontraron clientes para esta selección.</p>
-    @else
+    {{-- @if ($customersByCity->isEmpty())
+        <h2 class="text-lg font-bold mt-6">Clientes por Ciudad</h2>
         <ul class="list-disc list-inside">
-            @foreach ($customersByShop as $customer)
-                <li>{{ $customer->name }} ({{ $customer->email }})</li>
-            @endforeach
+            @if ($customersByCity->count() != 0)
+                @foreach ($customersByCity as $customer)
+                    <li>{{ $customer->name }} ({{ $customer->email }})</li>
+                @endforeach
+            @endif
         </ul>
-    @endif
 
-    <h2 class="text-lg font-bold mt-6">Clientes por Ciudad</h2>
-    @if ($customersByCity->isEmpty())
-        <p>No se encontraron clientes para esta selección.</p>
-    @else
-        <ul class="list-disc list-inside">
-            @foreach ($customersByCity as $customer)
-                <li>{{ $customer->name }} ({{ $customer->email }})</li>
-            @endforeach
-        </ul>
-    @endif
+    @endif --}}
 
 
 </div>
