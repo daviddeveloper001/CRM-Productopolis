@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Mail\SegmentEmail;
 use App\Models\City;
 use App\Models\Sale;
 use Filament\Pages\Page;
@@ -17,6 +18,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Tables\Contracts\HasTable;  // Añade esta interfaz
 use Filament\Tables\Concerns\InteractsWithTable; // Añade este trait
+use Illuminate\Support\Facades\Mail;
 
 
 class TableSegmentionsPage extends Page implements HasTable
@@ -113,7 +115,30 @@ class TableSegmentionsPage extends Page implements HasTable
                 ->color('success')
                 ->label('Enviar Correo')
                     ->requiresConfirmation()
-                    ->action(fn(Collection $records) => $records->each->delete()),
+                    ->action(function (Collection $records) {
+                        // Iterar sobre cada registro seleccionado
+                        $records->each(function ($segmentRegister) {
+                            // Asegúrate de cargar las relaciones
+                            $segmentRegister->load('sale.customer');
+
+                            $email = $segmentRegister->sale->customer->email;
+
+                            if ($email) {
+                                Mail::to($email)->send(new SegmentEmail());
+                            }
+
+                            //dd('correo' . $email);
+            
+                            /* foreach ($segmentRegister->sale as $item) {
+
+                                $customer = $item->customer;
+            
+                                if ($customer) {
+                                    dd('correo enviado');
+                                }
+                            } */
+                        });
+                    }),
 
                 BulkAction::make('send_sms')
                 ->label('Enviar SMS')
