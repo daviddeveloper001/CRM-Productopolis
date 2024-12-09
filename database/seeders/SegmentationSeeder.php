@@ -12,15 +12,15 @@ class SegmentationSeeder extends Seeder
      */
     public function run(): void
     {
-        Segmentation::create([
+        Segmentation::updateOrCreate([
             'type' => 'Oro',
         ]);
 
-        Segmentation::create([
+        Segmentation::updateOrCreate([
             'type' => 'Plata',
         ]);
 
-        Segmentation::create([
+        Segmentation::updateOrCreate([
             'type' => 'Bronce',
         ]);
     }
