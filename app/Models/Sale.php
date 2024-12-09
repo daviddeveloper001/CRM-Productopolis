@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sale extends Model
 {
@@ -88,6 +89,11 @@ class Sale extends Model
     public function returnAlert(): BelongsTo
     {
         return $this->belongsTo(ReturnAlert::class);
+    }
+
+    public function segmentRegisters() : HasMany
+    {
+        return $this->hasMany(SegmentRegister::class);
     }
 
     public static function getForm(): array

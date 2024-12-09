@@ -32,4 +32,9 @@ class Segmentation extends Model
     {
         return $this->hasMany(Sale::class);
     }
+
+    public function registers()
+    {
+        return $this->hasMany(SegmentRegister::class);
+    }
 }

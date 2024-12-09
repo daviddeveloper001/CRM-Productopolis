@@ -61,6 +61,20 @@
         </ul>
     @endif
 
+    @if (!$customersByShop['query']->isEmpty())
+        <h2 class="text-lg font-bold mt-6">Clientes por Tiendas</h2>
+        <ul class="list-disc list-inside">
+            @foreach ($customersByShop['shops'] as $shop)
+                @if ($shop->customers_count != 0)
+                    <li>
+                        <strong>{{ $shop->name }}</strong>:
+                        {{ $shop->customers_count ?? 0 }} clientes
+                    </li>
+                @endif
+            @endforeach
+        </ul>
+    @endif
+
 
     @if (!$customersByCity['query']->isEmpty())
         <h2 class="text-lg font-bold mt-6">Clientes por Ciudad</h2>
@@ -76,18 +90,18 @@
         </ul>
     @endif
 
-
-    {{-- @if ($customersByCity->isEmpty())
-        <h2 class="text-lg font-bold mt-6">Clientes por Ciudad</h2>
-        <ul class="list-disc list-inside">
-            @if ($customersByCity->count() != 0)
-                @foreach ($customersByCity as $customer)
-                    <li>{{ $customer->name }} ({{ $customer->email }})</li>
-                @endforeach
+    @if (!$customersByDepartment['query']->isEmpty())
+    <h2 class="text-lg font-bold mt-6">Clientes por Departamento</h2>
+    <ul class="list-disc list-inside">
+        @foreach ($customersByDepartment['departments'] as $department)
+            @if ($department['customers_count'] != 0)
+                <li>
+                    <strong>{{ $department['name'] }}</strong>:
+                    {{ $department['customers_count'] ?? 0 }} clientes
+                </li>
             @endif
-        </ul>
-
-    @endif --}}
-
+        @endforeach
+    </ul>
+@endif
 
 </div>

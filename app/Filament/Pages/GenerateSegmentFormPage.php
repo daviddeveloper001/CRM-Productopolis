@@ -12,6 +12,8 @@ use App\Models\ReturnAlert;
 use App\Models\Segmentation;
 use Filament\Actions\Action;
 use App\Models\PaymentMethod;
+use App\Models\SegmentionRegister;
+use App\Models\SegmentRegister;
 use Faker\Provider\ar_EG\Payment;
 use Illuminate\Contracts\View\View;
 use Filament\Forms\Components\Select;
@@ -37,12 +39,11 @@ class GenerateSegmentFormPage extends Page
         $this->formData = [];
     }
 
-    public function submit(): Collection
+    public function submit()
     {
-        // Inicializar consulta base con relaciones
+        // Ejecutar la consulta
         $query = Sale::with(['customer', 'paymentMethod', 'shop', 'seller', 'segmentation', 'returnAlert']);
 
-        // Mapear filtros dinámicos y aplicarlos
         $filters = [
             'payment_method_id' => $this->formData['payment_method_id'] ?? null,
             'return_alert_id'   => $this->formData['alert'] ?? null,
@@ -59,7 +60,6 @@ class GenerateSegmentFormPage extends Page
             }
         }
 
-        // Filtrar por rango de días desde la compra
         $daysFromPurchase = $this->formData['days_from_purchase'] ?? null;
         $upDaysFromPurchase = $this->formData['up_to_days_from_purchase'] ?? null;
 
@@ -67,16 +67,32 @@ class GenerateSegmentFormPage extends Page
             $query->whereBetween('created_at', [now()->subDays($upDaysFromPurchase), now()->subDays($daysFromPurchase)]);
         }
 
-        // Aplicar límite si existe
         $limit = $this->formData['limit'] ?? null;
 
         if (!is_null($limit)) {
             $query->limit($limit);
         }
 
-        // Ejecutar la consulta y devolver los resultados
-        return $query->get();
+        // Obtener los datos
+        $data = $query->get();
+
+        $segment = Segmentation::create([
+            'type' => 'Seg' . str_pad(mt_rand(1, 999), 3, '0', STR_PAD_LEFT),
+        ]);
+        
+        
+        // Guardar las ventas en el registro del segmento
+        foreach ($data as $sale) {
+            SegmentRegister::create([
+                'segment_id' => $segment->id,
+                'sale_id' => $sale->id,
+            ]);
+        }
+        //dd($data);
+        return redirect()->route('table-segmentations');
+
     }
+
 
 
     public function submitAction(): Action
@@ -113,8 +129,13 @@ class GenerateSegmentFormPage extends Page
                         'query' => $this->getCustomersByCity()['query'],
                         'cities' => $this->getCustomersByCity()['cities']
                     ],
+                    'customersByDepartment' => [
+                        'query' => $this->getCustomersByDepartment()['query'],
+                        'departments' => $this->getCustomersByDepartment()['departments']
+                    ]
                 ]
             ))
+
             ->modalHeading('Información del segmento')
             ->modalSubmitActionLabel('Sí, generar')
             ->modalCancelActionLabel('Cancelar');
@@ -307,6 +328,59 @@ class GenerateSegmentFormPage extends Page
         ];
     }
 
+    protected function getCustomersByDepartment()
+    {
+        // Obtener el ID del departamento desde el formulario
+        $departmentId = $this->formData["department_id"] ?? null;
+
+        // Si no hay departamento seleccionado, devolver una colección vacía
+        if (is_null($departmentId)) {
+            return [
+                'query' => collect(),
+                'departments' => collect(), // Puedes incluir una lista de departamentos si lo necesitas
+            ];
+        }
+
+        // Consultar el departamento y cargar las ciudades con sus clientes y ventas
+        $department = Department::with(['cities.customers.sales' => function ($query) {
+            $query->distinct('customer_id'); // Ventas únicas por cliente
+        }])->find($departmentId);
+
+        if (!$department) {
+            return [
+                'query' => collect(),
+                'departments' => collect(),
+            ];
+        }
+
+        // Preparar el conteo de clientes únicos por departamento
+        $customers = collect();
+        $department->cities->each(function ($city) use (&$customers) {
+            $city->customers->each(function ($customer) use (&$customers) {
+                if ($customer->sales->isNotEmpty()) {
+                    $customers->push($customer);
+                }
+            });
+        });
+
+        $uniqueCustomers = $customers->unique('id'); // Clientes únicos por ID
+
+        // Contar los clientes únicos
+        $customersCount = $uniqueCustomers->count();
+
+        // Retornar los resultados
+        return [
+            'query' => $uniqueCustomers, // Lista de clientes únicos que han comprado
+            'departments' => [
+                [
+                    'name' => $department->name,
+                    'customers_count' => $customersCount,
+                ],
+            ], // Información para mostrar clientes únicos por departamento
+        ];
+    }
+
+
 
 
 
@@ -421,7 +495,6 @@ class GenerateSegmentFormPage extends Page
                 ]),
         ];
     }
-
 
     protected function getFormStatePath(): string
     {
