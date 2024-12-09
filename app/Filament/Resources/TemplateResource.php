@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CityResource\Pages;
 use App\Models\Sale;
 use App\Models\Template;
+use App\Utils\FormatUtils;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
@@ -81,13 +82,13 @@ class TemplateResource extends Resource
                                 ])
                                     ->schema([
                                         Placeholder::make('1')
-                                            ->label('[NOMBRE_CLIENTE]'),
+                                            ->label('[NOMBRE-CLIENTE]'),
                                         Placeholder::make('2')
-                                            ->label('[TELEFONO_CLIENTE]'),
+                                            ->label('[TELEFONO-CLIENTE]'),
                                         Placeholder::make('3')
-                                            ->label('[EMAIL_CLIENTE]'),
+                                            ->label('[EMAIL-CLIENTE]'),
                                         Placeholder::make('3')
-                                            ->label('[CIUDAD_CLIENTE]'),
+                                            ->label('[CIUDAD-CLIENTE]'),
                                         Placeholder::make('3')
                                             ->label('[TIENDA]'),
                                         Placeholder::make('3')
@@ -107,8 +108,6 @@ class TemplateResource extends Resource
                                     ->live(),
                                 RichEditor::make('content')
                                     ->label('Contenido')
-                                    ->fileAttachmentsDisk('public')
-                                    ->fileAttachmentsVisibility('public')
                                     ->fileAttachmentsDirectory('templates')
                                     ->required()
                                     ->columnSpan([
@@ -143,15 +142,15 @@ class TemplateResource extends Resource
                                     ->content(
                                         fn($get) => $get('type') === 'whatsapp'
                                             ? new HtmlString(
-                                                parseWhatsAppFormatting(
-                                                    replacePlaceholders(
+                                                FormatUtils::parseWhatsAppFormatting(
+                                                    FormatUtils::replaceSalePlaceholders(
                                                         $get('content'),
                                                         $get('preview_with')
                                                     )
                                                 )
                                             )
                                             : new HtmlString(
-                                                replacePlaceholders(
+                                                FormatUtils::replaceSalePlaceholders(
                                                     $get('content'),
                                                     $get('preview_with')
                                                 )
@@ -190,9 +189,7 @@ class TemplateResource extends Resource
                     ->searchable(),
                 TextColumn::make('content')
                     ->label('Contenido')
-                    ->html()
-                    ->formatStateUsing(fn($state) => nl2br(e($state)))
-                    ->wrap()
+                    ->html()->formatStateUsing(fn(string $state): HtmlString => new HtmlString($state))
                     ->lineClamp(10)
                     ->searchable()
             ])
@@ -220,43 +217,4 @@ class TemplateResource extends Resource
             'edit' => Pages\EditTemplate::route('/{record}/edit'),
         ];
     }
-}
-
-function parseWhatsAppFormatting($text)
-{
-    $text = preg_replace('/\*(.*?)\*/', '<strong>$1</strong>', $text);
-
-    $text = preg_replace('/_(.*?)_/', '<em>$1</em>', $text);
-
-    $text = preg_replace('/~(.*?)~/', '<del>$1</del>', $text);
-
-    $text = preg_replace('/```(.*?)```/', '<code>$1</code>', $text);
-
-    $text = preg_replace('/`(.*?)`/', '<code>$1</code>', $text);
-
-    return nl2br($text);
-}
-
-function replacePlaceholders($content, $saleId)
-{
-    $sale = Sale::find($saleId);
-
-    if (!$sale) {
-        return $content;
-    }
-
-    $placeholders = [
-        '[NOMBRE_CLIENTE]' => $sale->customer->customer_name,
-        '[TELEFONO_CLIENTE]' => $sale->customer->phone,
-        '[EMAIL_CLIENTE]' => $sale->customer->email,
-        '[CIUDAD_CLIENTE]' => $sale->customer->city->name,
-        '[VENDEDOR]' => $sale->seller->name,
-        '[TIENDA]' => $sale->shop->name,
-    ];
-
-    foreach ($placeholders as $placeholder => $value) {
-        $content = str_replace($placeholder, $value, $content);
-    }
-
-    return $content;
 }

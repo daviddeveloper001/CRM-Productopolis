@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Helpers\EvolutionAPI;
 use App\Mail\SegmentEmail;
 use App\Models\City;
 use App\Models\Sale;
@@ -10,6 +11,11 @@ use App\Models\Department;
 use Filament\Tables\Table;
 use App\Models\Segmentation;
 use App\Models\SegmentRegister;
+use App\Models\Template;
+use App\Utils\FormatUtils;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Actions\BulkAction;
@@ -19,7 +25,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Filament\Tables\Contracts\HasTable;  // Añade esta interfaz
 use Filament\Tables\Concerns\InteractsWithTable; // Añade este trait
 use Illuminate\Support\Facades\Mail;
-
+use Illuminate\Support\HtmlString;
 
 class TableSegmentionsPage extends Page implements HasTable
 {
@@ -112,8 +118,8 @@ class TableSegmentionsPage extends Page implements HasTable
             ])
             ->bulkActions([
                 BulkAction::make('send_email')
-                ->color('success')
-                ->label('Enviar Correo')
+                    ->color('success')
+                    ->label('Enviar Correo')
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                         // Iterar sobre cada registro seleccionado
@@ -128,7 +134,7 @@ class TableSegmentionsPage extends Page implements HasTable
                             }
 
                             //dd('correo' . $email);
-            
+
                             /* foreach ($segmentRegister->sale as $item) {
 
                                 $customer = $item->customer;
@@ -140,10 +146,86 @@ class TableSegmentionsPage extends Page implements HasTable
                         });
                     }),
 
-                BulkAction::make('send_sms')
-                ->label('Enviar SMS')
+                BulkAction::make('send_email_with_template')
+                    ->label('Enviar Mensaje')
                     ->requiresConfirmation()
-                    ->action(fn(Collection $records) => $records->each->delete())
+                    ->form([
+                        Select::make('template')
+                            ->label('Plantilla')
+                            ->options(Template::where('type', 'whatsapp')->pluck('name', 'id'))
+                            ->required()
+                            ->columnSpan([
+                                'sm' => 12,
+                                'xl' => 12,
+                                '2xl' => 12,
+                            ])
+                            ->live(),
+                        Select::make('preview_with')
+                            ->label('Previsualizar con')
+                            ->options(function () {
+                                return Sale::all()->mapWithKeys(function ($sale) {
+                                    return [$sale->id => 'Venta #' . $sale->id];
+                                });
+                            })
+                            ->columnSpan([
+                                'sm' => 12,
+                                'xl' => 12,
+                                '2xl' => 12,
+                            ])
+                            ->live(),
+                        Placeholder::make('preview')
+                            ->content(function ($get) {
+                                $template = Template::find($get('template'));
+                                $saleId = $get('preview_with');
+
+                                if (!$template) {
+                                    return new HtmlString('Selecciona una plantilla');
+                                }
+
+                                return new HtmlString(
+                                    FormatUtils::replaceSalePlaceholders(
+                                        FormatUtils::parseWhatsAppFormatting($template->content),
+                                        $saleId
+                                    )
+                                );
+                            })
+                            ->columnSpan([
+                                'sm' => 12,
+                                'xl' => 12,
+                                '2xl' => 12,
+                            ]),
+                        FileUpload::make('attachment')
+                            ->label('Adjunto')
+                            ->acceptedFileTypes(['image/*', 'audio/*', 'application/pdf'])
+                            ->maxSize(10240)
+                            ->columnSpan([
+                                'sm' => 12,
+                                'xl' => 12,
+                                '2xl' => 12,
+                            ])
+                            ->live(),
+                    ])
+                    ->action(function (Collection $records, array $data) {
+                        foreach ($records as $record) {
+                            $dataToSend = [
+                                'phone' => $record->sale->customer->phone,
+                                'message' => FormatUtils::replaceSalePlaceholders(
+                                    FormatUtils::parseWhatsAppFormatting($record->content),
+                                    $record->sale->id
+                                ),
+                                'filename' => isset($data['attachment']) ? $data['attachment'] : "",
+                                'attachment_url' => isset($data['attachment']) ? url('storage/' . $data['attachment']) : "",
+                            ];
+
+                            EvolutionAPI::whatsapp_send_message_EA(
+                                $dataToSend['filename'],
+                                $dataToSend['attachment_url'],
+                                $dataToSend['phone'],
+                                $dataToSend['message'],
+                                EvolutionAPI::get_instance('SALES')
+                            );
+                        }
+                    }),
             ])
             ->headerActions([
                 Action::make('Enviar Correo')
