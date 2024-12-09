@@ -3,15 +3,18 @@
 namespace App\Filament\Pages;
 
 use App\Models\City;
-use App\Models\Department;
 use App\Models\Sale;
-use App\Models\Segmentation;
 use Filament\Pages\Page;
+use App\Models\Department;
 use Filament\Tables\Table;
+use App\Models\Segmentation;
 use App\Models\SegmentRegister;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Collection;
 use Filament\Tables\Contracts\HasTable;  // Añade esta interfaz
 use Filament\Tables\Concerns\InteractsWithTable; // Añade este trait
 
@@ -93,17 +96,33 @@ class TableSegmentionsPage extends Page implements HasTable
                     ->label('Alerta de Devolución'),
             ])
             ->filters([
-                SelectFilter::make('segment.type')
-                ->label('Seg')
-                ->options(Segmentation::all()->pluck('type', 'type')),
+                SelectFilter::make('segmentation.type')
+                    ->label('Seg')
+                    ->relationship('sale.segmentation', 'type'),
                 SelectFilter::make('sale.customer.customer_name')
-                ->label('Cliente'),
+                    ->label('Cliente'),
                 SelectFilter::make('sale.customer.city.name')
-                ->label('Ciudad')
-                ->options(City::all()->pluck('name', 'id')),
+                    ->label('Ciudad')
+                    ->relationship('sale.customer.city', 'name'),
                 SelectFilter::make('sale.customer.city.department.name')
-                ->label('Departamento')
+                    ->label('Departamento')
                     ->options(Department::all()->pluck('name', 'name')),
+            ])
+            ->bulkActions([
+                BulkAction::make('send_email')
+                ->color('success')
+                ->label('Enviar Correo')
+                    ->requiresConfirmation()
+                    ->action(fn(Collection $records) => $records->each->delete()),
+
+                BulkAction::make('send_sms')
+                ->label('Enviar SMS')
+                    ->requiresConfirmation()
+                    ->action(fn(Collection $records) => $records->each->delete())
+            ])
+            ->headerActions([
+                Action::make('Enviar Correo')
+                    ->label('Enviar Correo')
             ]);
     }
 }
