@@ -21,6 +21,7 @@ use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Notification;
 
 class GenerateSegmentFormPage extends Page
 {
@@ -79,8 +80,8 @@ class GenerateSegmentFormPage extends Page
         $segment = Segmentation::create([
             'type' => 'Seg' . str_pad(mt_rand(1, 999), 3, '0', STR_PAD_LEFT),
         ]);
-        
-        
+
+
         // Guardar las ventas en el registro del segmento
         foreach ($data as $sale) {
             SegmentRegister::create([
@@ -91,6 +92,10 @@ class GenerateSegmentFormPage extends Page
         //dd($data);
         return redirect()->route('table-segmentations');
 
+        Notification::make()
+            ->title('Segmento generado correctamente')
+            ->success()
+            ->send();
     }
 
 

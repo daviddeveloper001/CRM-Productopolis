@@ -33,5 +33,13 @@ class ConfigSeeder extends Seeder
                 'value' => 2,
             ]
         );
+
+        Config::updateOrCreate(
+            ['key_' => 'SEGMENTATION_BATCH_SIZE'],
+            [
+                'key_' => 'SEGMENTATION_BATCH_SIZE',
+                'value' => 10,
+            ]
+        );
     }
 }

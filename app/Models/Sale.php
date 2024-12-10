@@ -23,7 +23,6 @@ class Sale extends Model
     protected $fillable = [
         'customer_id',
         'orders_number',
-        'order_date',
         'delivered',
         'returns_number',
         'date_first_order',
@@ -37,7 +36,6 @@ class Sale extends Model
         'shop_id',
         'last_item_purchased',
         'previous_last_item_purchased',
-        'last_days_purchase_days',
         'days_since_last_purchase',
         'segmentation_id',
         'return_alert_id',
@@ -50,7 +48,6 @@ class Sale extends Model
      */
     protected $casts = [
         'id' => 'integer',
-        'order_date' => 'date',
         'last_order_date_delivered' => 'date',
         'total_sales' => 'decimal:2',
         'total_revenues' => 'decimal:2',
@@ -62,6 +59,8 @@ class Sale extends Model
         'segmentation_id' => 'integer',
         'return_alert_id' => 'integer',
         'payment_method_id' => 'integer',
+        'date_first_order' => 'date',
+        'date_last_order' => 'date',
     ];
 
     public function customer(): BelongsTo
