@@ -9,27 +9,30 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Address;
+use Illuminate\Mail\Mailables\Attachment;
 
 class SegmentEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
+    public $mailData;
+    public $attachment;
+
+    public function __construct($mailData, $attachment = null)
     {
-        //
+        $this->mailData = $mailData;
+        //dd($this->mailData['message']);
+        $this->attachment = $attachment;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Notification',
-            from: new Address(env('MAIL_FROM_ADDRESS', 'no-reply@myplataform.com'),env('MAIL_FROM_NAME'),'administracion')
+            subject: 'Notification: ' . ($this->mailData['name'] ?? 'Sin Nombre'),
+            from: new Address(
+                env('MAIL_FROM_ADDRESS', 'no-reply@myplataform.com'),
+                env('MAIL_FROM_NAME', 'Administración')
+            )
         );
     }
 
@@ -39,7 +42,11 @@ class SegmentEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.segment-email',
+            markdown: 'email.segment-email', 
+            with: [ 
+                'name' => $this->mailData['name'] ?? 'Cliente',
+                'message' => $this->mailData['message'] ?? '',
+            ]
         );
     }
 
@@ -50,6 +57,15 @@ class SegmentEmail extends Mailable
      */
     public function attachments(): array
     {
+        // Adjuntar archivo si está presente
+        if ($this->attachment) {
+            return [
+                Attachment::fromPath(storage_path('app/public/' . $this->attachment))
+                    ->as(basename($this->attachment))
+                    ->withMime('application/pdf'), // Cambia según el tipo de archivo
+            ];
+        }
+
         return [];
     }
 }

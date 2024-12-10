@@ -7,6 +7,9 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Mensaje de segmentación</h1>
+    <p>Hola {{ $name }},</p>
+    {{ $message }}
+
+    <p>Gracias por confiar en nosotros.</p>
 </body>
 </html>

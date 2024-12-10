@@ -41,12 +41,6 @@ class TableSegmentionsPage extends Page implements HasTable
 
     public $data;
 
-    /* public function mount()
-    {
-        $this->data = SegmentRegister::latest()->with(['segment', 'sale.customer', 'sale.shop', 'sale.seller', 'sale.paymentMethod', 'sale.returnAlert'])->get();
-
-    } */
-
     public function table(Table $table): Table
     {
         return $table
@@ -118,33 +112,87 @@ class TableSegmentionsPage extends Page implements HasTable
             ])
             ->bulkActions([
                 BulkAction::make('send_email')
-                    ->color('success')
-                    ->label('Enviar Correo')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        // Iterar sobre cada registro seleccionado
-                        $records->each(function ($segmentRegister) {
-                            // Asegúrate de cargar las relaciones
-                            $segmentRegister->load('sale.customer');
+                ->label('Enviar Correo')
+                ->color('success')
+                ->requiresConfirmation()
+                ->form([
+                    Select::make('template')
+                        ->label('Plantilla')
+                        ->options(Template::where('type', 'email')->pluck('name', 'id'))
+                        ->required()
+                        ->columnSpan([
+                            'sm' => 12,
+                            'xl' => 12,
+                            '2xl' => 12,
+                        ])
+                        ->live(),
+                    Select::make('preview_with')
+                        ->label('Previsualizar con')
+                        ->options(function () {
+                            return Sale::all()->mapWithKeys(function ($sale) {
+                                return [$sale->id => 'Venta #' . $sale->id];
+                            });
+                        })
+                        ->columnSpan([
+                            'sm' => 12,
+                            'xl' => 12,
+                            '2xl' => 12,
+                        ])
+                        ->live(),
+                    Placeholder::make('preview')
+                        ->content(function ($get) {
+                            $template = Template::find($get('template'));
+                            $saleId = $get('preview_with');
 
-                            $email = $segmentRegister->sale->customer->email;
-
-                            if ($email) {
-                                Mail::to($email)->send(new SegmentEmail());
+                            if (!$template) {
+                                return new HtmlString('Selecciona una plantilla');
                             }
 
-                            //dd('correo' . $email);
+                            return new HtmlString(
+                                FormatUtils::replaceSalePlaceholders(
+                                    $template->content,
+                                    $saleId
+                                )
+                            );
+                        })
+                        ->columnSpan([
+                            'sm' => 12,
+                            'xl' => 12,
+                            '2xl' => 12,
+                        ]),
+                    FileUpload::make('attachment')
+                        ->label('Adjunto')
+                        ->acceptedFileTypes(['image/*', 'audio/*', 'application/pdf'])
+                        ->maxSize(10240)
+                        ->columnSpan([
+                            'sm' => 12,
+                            'xl' => 12,
+                            '2xl' => 12,
+                        ])
+                        ->live(),
+                ])
+                ->action(function (Collection $records, array $data) {
+                    foreach ($records as $segmentRegister) {
+                        $segmentRegister->load('sale.customer');
+                        $email = $segmentRegister->sale->customer->email;
+                        
+                        if ($email) {
+                            $template = Template::find($data['template']);
+                            $messageContent = FormatUtils::replaceSalePlaceholders(
+                                $template->content,
+                                $segmentRegister->sale->id
+                            );
 
-                            /* foreach ($segmentRegister->sale as $item) {
+                            $mailData = [
+                                'name' => $segmentRegister->sale->customer->customer_name,
+                                'message' => $messageContent,
+                                'attachment_url' => isset($data['attachment']) ? url('storage/' . $data['attachment']) : "",
+                            ];
 
-                                $customer = $item->customer;
-            
-                                if ($customer) {
-                                    dd('correo enviado');
-                                }
-                            } */
-                        });
-                    }),
+                            Mail::to($email)->send(new SegmentEmail($mailData, $data['attachment'] ?? null));
+                        }
+                    }
+                }),
 
                 BulkAction::make('send_email_with_template')
                     ->label('Enviar Mensaje')
@@ -226,10 +274,6 @@ class TableSegmentionsPage extends Page implements HasTable
                             );
                         }
                     }),
-            ])
-            ->headerActions([
-                Action::make('Enviar Correo')
-                    ->label('Enviar Correo')
             ]);
     }
 }
