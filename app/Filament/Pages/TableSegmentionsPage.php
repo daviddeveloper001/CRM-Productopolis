@@ -59,7 +59,7 @@ class TableSegmentionsPage extends Page implements HasTable
                 TextColumn::make('sale.customer.first_name')
                     ->label('Primer Nombre'),
                 TextColumn::make('sale.customer.phone')
-                    ->label('Telefón'),
+                    ->label('Teléfono'),
                 TextColumn::make('sale.customer.email')
                     ->label('Correo'),
                 TextColumn::make('sale.customer.city.name')

@@ -401,7 +401,7 @@ class GenerateSegmentFormPage extends Page
                     '2xl' => 8,
                 ])
                 ->schema([
-                    TextInput::make('days_from_purchase')
+                    /* TextInput::make('days_from_purchase')
                         ->label('Días desde Compra')
                         ->columnSpan([
                             'sm' => 2,
@@ -414,7 +414,7 @@ class GenerateSegmentFormPage extends Page
                             'sm' => 2,
                             'xl' => 3,
                             '2xl' => 4,
-                        ]),
+                        ]), */
                     Select::make('payment_method_id')
                         ->label('Método de pago')
                         ->options(PaymentMethod::all()->pluck('name', 'id'))
@@ -457,13 +457,13 @@ class GenerateSegmentFormPage extends Page
                             '2xl' => 4,
                         ]),
 
-                    TextInput::make('limit')
+                    /* TextInput::make('limit')
                         ->label('Limite')
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,
                             '2xl' => 4,
-                        ]),
+                        ]), */
                     Select::make('segmentation_id')
                         ->label('Segmento')
                         //->searchable()

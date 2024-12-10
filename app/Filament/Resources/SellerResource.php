@@ -34,11 +34,7 @@ class SellerResource extends Resource
                     ->required()
                     ->label('Nombre')
                     ->maxLength(400),
-                Forms\Components\TextInput::make('last_name')
-                    ->label('Apellidos')
-                    ->required()
-                    ->maxLength(400),
-                Forms\Components\Select::make('shop_id')
+                /* Forms\Components\Select::make('shop_id')
                     ->label('Tienda')
                     ->searchable()
                     ->preload()
@@ -48,7 +44,7 @@ class SellerResource extends Resource
                             ->required(),
                     ])
                     ->relationship('shop', 'name')
-                    ->required(),
+                    ->required(), */
             ]);
     }
 
@@ -59,13 +55,10 @@ class SellerResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nombre')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('last_name')
-                    ->label('Apellidos')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('shop.name')
+                /* Tables\Columns\TextColumn::make('shop.name')
                     ->label('Tienda')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable(), */
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
