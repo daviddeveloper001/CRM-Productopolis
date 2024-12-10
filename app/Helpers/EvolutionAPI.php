@@ -101,6 +101,7 @@ class EvolutionAPI
             ]);
 
             $response = curl_exec($curl);
+
             $err = curl_error($curl);
 
             curl_close($curl);
@@ -167,12 +168,14 @@ class EvolutionAPI
                 in_array($mediaData['mediaType'], ['audio', 'video']) &&
                 in_array($mediaData['mimeType'], ['video/webm'])
             ) {
+
                 self::whatsapp_send_audio_EA(
                     $phone,
                     $instance,
                     $fileURL
                 );
             } else {
+
                 self::whatsapp_send_media_EA(
                     $phone,
                     $content,
@@ -182,6 +185,7 @@ class EvolutionAPI
                 );
             }
         } else {
+
             self::whatsapp_sent_EA(
                 $phone,
                 $content,

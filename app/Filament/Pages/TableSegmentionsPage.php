@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Helpers\EvolutionAPI;
 use App\Mail\SegmentEmail;
 use App\Models\City;
+use App\Models\Config;
 use App\Models\Sale;
 use Filament\Pages\Page;
 use App\Models\Department;
@@ -254,24 +255,64 @@ class TableSegmentionsPage extends Page implements HasTable
                             ->live(),
                     ])
                     ->action(function (Collection $records, array $data) {
-                        foreach ($records as $record) {
-                            $dataToSend = [
-                                'phone' => $record->sale->customer->phone,
-                                'message' => FormatUtils::replaceSalePlaceholders(
-                                    FormatUtils::parseWhatsAppFormatting($record->content),
-                                    $record->sale->id
-                                ),
-                                'filename' => isset($data['attachment']) ? $data['attachment'] : "",
-                                'attachment_url' => isset($data['attachment']) ? url('storage/' . $data['attachment']) : "",
-                            ];
+                        $batch = Config::where('key_', 'SEGMENTATION_BATCH')->first()->value;
 
-                            EvolutionAPI::whatsapp_send_message_EA(
-                                $dataToSend['filename'],
-                                $dataToSend['attachment_url'],
-                                $dataToSend['phone'],
-                                $dataToSend['message'],
-                                EvolutionAPI::get_instance('SALES')
-                            );
+                        if ($batch == 1) {
+
+                            $batchSize = is_numeric(Config::where('key_', 'SEGMENTATION_BATCH_SIZE')->first()->value) ? (int) Config::where('key_', 'SEGMENTATION_BATCH_SIZE')->first()->value : 10;
+                            $batchDelay = is_numeric(Config::where('key_', 'SEGMENTATION_BATCH_DELAY')->first()->value) ? (float) Config::where('key_', 'SEGMENTATION_BATCH_DELAY')->first()->value : 0.3;
+                            $messageDelay = is_numeric(Config::where('key_', 'SEGMENTATION_BATCH_MESSAGE_DELAY')->first()->value) ? (float) Config::where('key_', 'SEGMENTATION_BATCH_MESSAGE_DELAY')->first()->value : 0.3;
+
+                            $records->chunk($batchSize)->each(function ($chunk, $index) use ($data, $batchSize, $batchDelay, $messageDelay, $records) {
+                                $chunk->each(function ($record) use ($data, $messageDelay) {
+
+                                    $dataToSend = [
+                                        'phone' => $record->sale->customer->phone,
+                                        'message' => FormatUtils::replaceSalePlaceholders(
+                                            Template::find($data['template'])->content,
+                                            $record->sale->id
+                                        ),
+                                        'filename' => isset($data['attachment']) ? $data['attachment'] : "",
+                                        'attachment_url' => isset($data['attachment']) ? url('storage/' . $data['attachment']) : "",
+                                    ];
+
+                                    EvolutionAPI::whatsapp_send_message_EA(
+                                        $dataToSend['filename'],
+                                        /*$dataToSend['attachment_url'],*/
+                                        "https://olondriz.com/wp-content/uploads/2020/04/ambar-perrito-1.jpg",
+                                        $dataToSend['phone'],
+                                        $dataToSend['message'],
+                                        'SALES'
+                                    );
+
+                                    sleep($messageDelay);
+                                });
+
+                                if ($index < $records->chunk($batchSize)->count() - 1) {
+                                    sleep($batchDelay);
+                                }
+                            });
+                        } else {
+                            foreach ($records as $record) {
+                                $dataToSend = [
+                                    'phone' => $record->sale->customer->phone,
+                                    'message' => FormatUtils::replaceSalePlaceholders(
+                                        Template::find($data['template'])->content,
+                                        $record->sale->id
+                                    ),
+                                    'filename' => isset($data['attachment']) ? $data['attachment'] : "",
+                                    'attachment_url' => isset($data['attachment']) ? url('storage/' . $data['attachment']) : "",
+                                ];
+
+                                EvolutionAPI::whatsapp_send_message_EA(
+                                    $dataToSend['filename'],
+                                    /*$dataToSend['attachment_url'],*/
+                                    "https://olondriz.com/wp-content/uploads/2020/04/ambar-perrito-1.jpg",
+                                    $dataToSend['phone'],
+                                    $dataToSend['message'],
+                                    'SALES'
+                                );
+                            }
                         }
                     }),
             ]);
