@@ -21,23 +21,26 @@ class Sale extends Model
      * @var array
      */
     protected $fillable = [
+        'customer_id',
+        'orders_number',
         'order_date',
-        'last_order_date_delivered',
+        'delivered',
+        'returns_number',
+        'date_first_order',
+        'date_last_order',
+        'last_order_date_delivered',  
         'total_sales',
         'total_revenues',
-        'orders_number',
-        'number_entries',
-        'returns_number',
         'return_value',
-        'last_days_purchase_days',
-        'last_item_purchased',
-        'customer_id',
-        'shop_id',
+        'payment_method_id',
         'seller_id',
-        'method_id',
+        'shop_id',
+        'last_item_purchased',
+        'previous_last_item_purchased',
+        'last_days_purchase_days',
+        'days_since_last_purchase',
         'segmentation_id',
         'return_alert_id',
-        'payment_method_id',
     ];
 
     /**

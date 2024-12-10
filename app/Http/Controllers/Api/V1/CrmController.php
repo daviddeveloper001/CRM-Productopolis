@@ -74,26 +74,28 @@ class CrmController extends Controller
 
                 $sale = Sale::create([
                     'customer_id' => $customer->id,
-                    'shop_id' => $shop->id,
-                    'seller_id' => $seller->id,
-                    'payment_method_id' => $paymentMethod->id,
-                    'segmentation_id' => $segmentation->id,
-                    'return_alert_id' => $returnAlert->id,
+                    "orders_number" => $registro['ordenes'],
                     "order_date" => $registro['fecha_primera_orden'],
+                    "delivered" => $registro['entregadas'],
+                    "returns_number" => $registro['devoluciones'],
+                    'date_first_order'=> $registro['fecha_primera_orden'],
+                    'date_last_order' => $registro['fecha_ultima_orden'],
                     "last_order_date_delivered" => $registro['fecha_ultima_orden'],
                     "total_sales" => $registro['ventas'],
                     "total_revenues" => $registro['ingresos'],
-                    "orders_number" => $registro['ordenes'],
-                    "number_entries" => $registro['entregadas'],
-                    "returns_number" => $registro['devoluciones'],
                     "return_value" => $registro['valor_devolucion'],
-                    "last_days_purchase_days" => $registro['dias_ultima_compra'],
-                    "last_item_purchased" => $registro['ultimo_item_comprado'], 
+                    'payment_method_id' => $paymentMethod->id,
+                    'seller_id' => $seller->id,
+                    'shop_id' => $shop->id,
+                    "last_item_purchased" => $registro['ultimo_item_comprado'],
+                    'previous_last_item_purchased' => $registro['antepeneltimo_item_comprado'],
+                    'days_since_last_purchase' => $registro['dias_ultima_compra'],
+                    'segmentation_id' => $segmentation->id,
+                    'return_alert_id' => $returnAlert->id,
                 ]);
 
 
                 response()->json($sale);
-
             }
         });
     }
