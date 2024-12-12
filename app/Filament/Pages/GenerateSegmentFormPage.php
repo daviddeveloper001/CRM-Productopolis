@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Campaign;
 use App\Models\City;
 use App\Models\Sale;
 use App\Models\Shop;
@@ -18,6 +19,8 @@ use App\Models\PaymentMethod;
 use App\Models\SegmentRegister;
 use Faker\Provider\ar_EG\Payment;
 use App\Models\SegmentionRegister;
+use App\Utils\FormatUtils;
+use Filament\Forms\Components\Placeholder;
 use Illuminate\Contracts\View\View;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
@@ -25,6 +28,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\HtmlString;
 
 class GenerateSegmentFormPage extends Page
 {
@@ -39,7 +43,7 @@ class GenerateSegmentFormPage extends Page
     //protected static ?string $model = Sale::class;
 
     public $formData = [];
-    
+
 
     public function mount()
     {
@@ -99,7 +103,8 @@ class GenerateSegmentFormPage extends Page
         $data = $query->get();
 
         $segment = Segmentation::create([
-            'name' => $this->formData['name_segment']
+            'name' => $this->formData['name_segment'],
+            'campaign_id' => $this->formData['campaign_id']
         ]);
 
         foreach ($data as $customer) {
@@ -381,11 +386,6 @@ class GenerateSegmentFormPage extends Page
         ];
     }
 
-
-
-
-
-
     protected function getFormSchema(): array
     {
         return [
@@ -411,14 +411,19 @@ class GenerateSegmentFormPage extends Page
                                 $set('is_unique', false);
                             }
                         })
-                        ->helperText(fn ($get) => $get('is_unique') === false 
-                        ? 'Este nombre ya está registrado. Por favor, elija otro.' 
-                        : '')                    
+                        ->helperText(fn($get) => $get('is_unique') === false
+                            ? 'Este nombre ya está registrado. Por favor, elija otro.'
+                            : '')
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,
                             '2xl' => 4,
                         ]),
+                    Select::make('campaign_id')
+                        ->label('Campaña')
+                        ->options(Campaign::all()->pluck('name', 'id'))
+                        ->preload()
+                        ->required()
                 ]),
             Section::make('Filtros de segmentación')
                 ->columns([
@@ -426,7 +431,7 @@ class GenerateSegmentFormPage extends Page
                     'xl' => 4,
                     '2xl' => 8,
                 ])
-                ->hidden(fn (Get $get): bool => ! $get('name_segment'))
+                ->hidden(fn(Get $get): bool => ! $get('name_segment'))
                 ->schema([
                     /* TextInput::make('days_from_purchase')
                         ->label('Días desde Compra')

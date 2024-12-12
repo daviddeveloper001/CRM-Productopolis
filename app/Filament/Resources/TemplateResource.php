@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CityResource\Pages;
+use App\Models\Customer;
 use App\Models\Sale;
 use App\Models\Template;
 use App\Utils\FormatUtils;
@@ -88,11 +89,7 @@ class TemplateResource extends Resource
                                         Placeholder::make('3')
                                             ->label('[EMAIL-CLIENTE]'),
                                         Placeholder::make('3')
-                                            ->label('[CIUDAD-CLIENTE]'),
-                                        Placeholder::make('3')
-                                            ->label('[TIENDA]'),
-                                        Placeholder::make('3')
-                                            ->label('[VENDEDOR]')
+                                            ->label('[CIUDAD-CLIENTE]')
                                     ])
                                     ->columns(3),
                                 Textarea::make('content')
@@ -128,8 +125,8 @@ class TemplateResource extends Resource
                                 Select::make('preview_with')
                                     ->label('Previsualizar con')
                                     ->options(function () {
-                                        return Sale::all()->mapWithKeys(function ($sale) {
-                                            return [$sale->id => 'Venta #' . $sale->id];
+                                        return Customer::all()->mapWithKeys(function ($customer) {
+                                            return [$customer->id => $customer->customer_name];
                                         });
                                     })
                                     ->columnSpan([
@@ -143,14 +140,14 @@ class TemplateResource extends Resource
                                         fn($get) => $get('type') === 'whatsapp'
                                             ? new HtmlString(
                                                 FormatUtils::parseWhatsAppFormatting(
-                                                    FormatUtils::replaceSalePlaceholders(
+                                                    FormatUtils::replaceCustomerPlaceholders(
                                                         $get('content'),
                                                         $get('preview_with')
                                                     )
                                                 )
                                             )
                                             : new HtmlString(
-                                                FormatUtils::replaceSalePlaceholders(
+                                                FormatUtils::replaceCustomerPlaceholders(
                                                     $get('content'),
                                                     $get('preview_with')
                                                 )

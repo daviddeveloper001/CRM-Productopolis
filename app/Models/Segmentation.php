@@ -20,6 +20,7 @@ class Segmentation extends Model
      */
     protected $fillable = [
         'name',
+        'campaign_id',
     ];
 
     /**
@@ -46,5 +47,10 @@ class Segmentation extends Model
     public function registers()
     {
         return $this->hasMany(SegmentRegister::class);
+    }
+
+    public function campaign()
+    {
+        return $this->belongsTo(Campaign::class);
     }
 }

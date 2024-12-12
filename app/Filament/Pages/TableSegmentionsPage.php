@@ -59,6 +59,12 @@ class TableSegmentionsPage extends Page implements HasTable
                 TextColumn::make('name')
                     ->label('Nombre segmento'),
 
+                TextColumn::make('campaign.name')
+                    ->label('Campaña')
+                    ->formatStateUsing(function ($state) {
+                        return $state ?? '--';
+                    }),
+
                 TextColumn::make('created_at')
                     ->label('Fecha de creación')
                     ->since()
@@ -195,7 +201,7 @@ class TableSegmentionsPage extends Page implements HasTable
                                 }
 
                                 return new HtmlString(
-                                    FormatUtils::replaceSalePlaceholders(
+                                    FormatUtils::replaceCustomerPlaceholders(
                                         $template->content,
                                         $saleId
                                     )
@@ -224,7 +230,7 @@ class TableSegmentionsPage extends Page implements HasTable
 
                             if ($email) {
                                 $template = Template::find($data['template']);
-                                $messageContent = FormatUtils::replaceSalePlaceholders(
+                                $messageContent = FormatUtils::replaceCustomerPlaceholders(
                                     $template->content,
                                     $segmentRegister->sale->id
                                 );
@@ -246,36 +252,34 @@ class TableSegmentionsPage extends Page implements HasTable
                     }), */
                     ->action(function (Collection $records, array $data) {
                         foreach ($records as $segmention) {
-                            
+
                             $segmention->load('customers');
-                            
+
                             $customers = $segmention->customers;
                             foreach ($customers as $customer) {
                                 $email = $customer->email;
                                 if ($email) {
                                     $template = Template::find($data['template']);
 
-                                    $messageContent = FormatUtils::replaceSalePlaceholders(
+                                    $messageContent = FormatUtils::replaceCustomerPlaceholders(
                                         $template->content,
                                         $customer->sales->id
                                     );
-    
+
                                     $mailData = [
                                         'name' => $segmention->sale->customer->customer_name,
                                         'message' => $messageContent,
                                         'attachment_url' => isset($data['attachment']) ? url('storage/' . $data['attachment']) : "",
                                     ];
-    
+
                                     Mail::to($email)->send(new SegmentEmail($mailData, $data['attachment'] ?? null));
                                 }
-    
+
                                 Notification::make()
                                     ->title('Correo enviado exitosamente')
                                     ->success()
                                     ->send();
                             }
-
-                            
                         }
                     }),
 
@@ -316,7 +320,7 @@ class TableSegmentionsPage extends Page implements HasTable
                                 }
 
                                 return new HtmlString(
-                                    FormatUtils::replaceSalePlaceholders(
+                                    FormatUtils::replaceCustomerPlaceholders(
                                         FormatUtils::parseWhatsAppFormatting($template->content),
                                         $saleId
                                     )
@@ -352,7 +356,7 @@ class TableSegmentionsPage extends Page implements HasTable
 
                                     $dataToSend = [
                                         'phone' => $record->sale->customer->phone,
-                                        'message' => FormatUtils::replaceSalePlaceholders(
+                                        'message' => FormatUtils::replaceCustomerPlaceholders(
                                             Template::find($data['template'])->content,
                                             $record->sale->id
                                         ),
@@ -380,7 +384,7 @@ class TableSegmentionsPage extends Page implements HasTable
                             foreach ($records as $record) {
                                 $dataToSend = [
                                     'phone' => $record->sale->customer->phone,
-                                    'message' => FormatUtils::replaceSalePlaceholders(
+                                    'message' => FormatUtils::replaceCustomerPlaceholders(
                                         Template::find($data['template'])->content,
                                         $record->sale->id
                                     ),
