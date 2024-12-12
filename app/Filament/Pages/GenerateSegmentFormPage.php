@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\City;
+use App\Models\Customer;
 use App\Models\Sale;
 use App\Models\Shop;
 use App\Models\Seller;
@@ -42,26 +43,39 @@ class GenerateSegmentFormPage extends Page
 
     public function submit()
     {
-        // Ejecutar la consulta
-        $query = Sale::with(['customer', 'paymentMethod', 'shop', 'seller', 'segmentation', 'returnAlert']);
 
+        // Ejecutar la consulta
+        //$query = Sale::with(['customer', 'paymentMethod', 'shop', 'seller', 'returnAlert']);
+        
+        $query = Customer::with(['sales', 'sales.paymentMethod', 'sales.shop', 'sales.seller', 'sales.returnAlert']);
+        
+        
+        
         $filters = [
             'payment_method_id' => $this->formData['payment_method_id'] ?? null,
             'return_alert_id'   => $this->formData['alert'] ?? null,
             'department_id'     => $this->formData['department_id'] ?? null,
             'city_id'           => $this->formData['city_id'] ?? null,
-            'segmentation_id'   => $this->formData['segmentation_id'] ?? null,
             'seller_id'         => $this->formData['seller_id'] ?? null,
             'shop_id'           => $this->formData['shop_id'] ?? null,
         ];
+        
 
-        foreach ($filters as $column => $value) {
-            if (!is_null($value)) {
-                $query->where($column, $value);
+        $query->whereHas('sales', function ($salesQuery) use ($filters) {
+            foreach ($filters as $column => $value) {
+                if (!is_null($value)) {
+                    // Dependiendo del filtro, aplicar las condiciones correctas de forma específica
+                    if (in_array($column, ['payment_method_id', 'return_alert_id', 'shop_id', 'seller_id'])) {
+                        $salesQuery->where($column, $value); // Campos que pertenecen al modelo Sale
+                    }
+                }
             }
-        }
+        });
+        
+        
 
-        $daysFromPurchase = $this->formData['days_from_purchase'] ?? null;
+
+        /* $daysFromPurchase = $this->formData['days_from_purchase'] ?? null;
         $upDaysFromPurchase = $this->formData['up_to_days_from_purchase'] ?? null;
 
         if (!is_null($daysFromPurchase) && !is_null($upDaysFromPurchase)) {
@@ -72,30 +86,32 @@ class GenerateSegmentFormPage extends Page
 
         if (!is_null($limit)) {
             $query->limit($limit);
-        }
+        } */
+
+
 
         // Obtener los datos
         $data = $query->get();
 
         $segment = Segmentation::create([
-            'type' => 'Seg' . str_pad(mt_rand(1, 999), 3, '0', STR_PAD_LEFT),
+            'name' => $this->formData['name_segment']
         ]);
 
-
-        // Guardar las ventas en el registro del segmento
-        foreach ($data as $sale) {
+        foreach ($data as $customer) {
             SegmentRegister::create([
                 'segment_id' => $segment->id,
-                'sale_id' => $sale->id,
+                'customer_id' => $customer->id,
             ]);
         }
-        //dd($data);
-        return redirect()->route('table-segmentations');
 
         Notification::make()
-            ->title('Segmento generado correctamente')
-            ->success()
-            ->send();
+        ->title('Segmento generado correctamente')
+        ->success()
+        ->send();
+
+        return redirect()->route('table-segmentations');
+
+
     }
 
 
@@ -126,10 +142,6 @@ class GenerateSegmentFormPage extends Page
                         'query' => $this->getCustomersBySeller()['query'],
                         'sellers' => $this->getCustomersBySeller()['sellers']
                     ],
-                    'getCustomersBySegmentation' => [
-                        'query' => $this->getCustomersBySegmentation()['query'],
-                        'segmentations' => $this->getCustomersBySegmentation()['segmentations']
-                    ],
                     'customersByCity' => [
                         'query' => $this->getCustomersByCity()['query'],
                         'cities' => $this->getCustomersByCity()['cities']
@@ -149,24 +161,25 @@ class GenerateSegmentFormPage extends Page
     protected function getCustomersByPaymentMethod()
     {
         $paymentMethodId = $this->formData["payment_method_id"] ?? null;
-
+        
         $payments = PaymentMethod::withCount(['sales as customers_count' => function ($query) {
             $query->distinct('customer_id');
         }])->get();
-
+        
+        
         if (is_null($paymentMethodId)) {
             return [
                 'query' => collect(),
                 'payments' => $payments,
             ]; // Retorna una colección vacía pero con las segmentaciones.
         }
-
+        
         // Obtener los clientes específicos de la segmentación seleccionada
         $query = Sale::where('payment_method_id', $paymentMethodId)
-            ->with('customer') // Cargar la relación con clientes
-            ->get()
-            ->pluck('customer');
-
+        ->with('customer.sales.paymentMethod') // Cargar la relación con clientes
+        ->get()
+        ->pluck('customer');
+        
         return [
             'query' => $query,
             'payments' => $payments,
@@ -212,12 +225,12 @@ class GenerateSegmentFormPage extends Page
             return [
                 'query' => collect(),
                 'sellers' => $sellers,
-            ]; // Retorna una colección vacía pero con las segmentaciones.
+            ];
         }
 
-        // Obtener los clientes específicos de la segmentación seleccionada
-        $query = Sale::where('segmentation_id', $sellerId)
-            ->with('customer') // Cargar la relación con clientes
+
+        $query = Sale::where('seller_id', $sellerId)
+            ->with('customer')
             ->get()
             ->pluck('customer');
 
@@ -226,36 +239,6 @@ class GenerateSegmentFormPage extends Page
             'sellers' => $sellers,
         ];
     }
-
-
-
-    protected function getCustomersBySegmentation()
-    {
-        $segmentationId = $this->formData["segmentation_id"] ?? null;
-
-        $segmentations = Segmentation::withCount(['sales as customers_count' => function ($query) {
-            $query->distinct('customer_id');
-        }])->get();
-
-        if (is_null($segmentationId)) {
-            return [
-                'query' => collect(),
-                'segmentations' => $segmentations,
-            ]; // Retorna una colección vacía pero con las segmentaciones.
-        }
-
-        // Obtener los clientes específicos de la segmentación seleccionada
-        $query = Sale::where('segmentation_id', $segmentationId)
-            ->with('customer') // Cargar la relación con clientes
-            ->get()
-            ->pluck('customer');
-
-        return [
-            'query' => $query,
-            'segmentations' => $segmentations,
-        ];
-    }
-
 
     protected function getCustomersByShop()
     {
@@ -394,7 +377,24 @@ class GenerateSegmentFormPage extends Page
     {
         /* return Sale::getForm(); */
         return [
-            Section::make()
+            Section::make('Información del segmento')
+                ->columns([
+                    'sm' => 3,
+                    'xl' => 4,
+                    '2xl' => 8,
+                ])
+                ->schema([
+                    TextInput::make('name_segment')
+                        ->label('Nombre del Segmento')
+                        ->required()
+                        ->unique()
+                        ->columnSpan([
+                            'sm' => 2,
+                            'xl' => 3,
+                            '2xl' => 4,
+                        ]),
+                ]),
+            Section::make('Filtros de segmentación')
                 ->columns([
                     'sm' => 3,
                     'xl' => 4,
@@ -464,7 +464,7 @@ class GenerateSegmentFormPage extends Page
                             'xl' => 3,
                             '2xl' => 4,
                         ]), */
-                    Select::make('segmentation_id')
+                    /* Select::make('segmentation_id')
                         ->label('Segmento')
                         //->searchable()
                         ->preload()
@@ -473,7 +473,7 @@ class GenerateSegmentFormPage extends Page
                             'sm' => 2,
                             'xl' => 3,
                             '2xl' => 4,
-                        ]),
+                        ]), */
 
                     Select::make('seller_id')
                         ->label('Vendedor')

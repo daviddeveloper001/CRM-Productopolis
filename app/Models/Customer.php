@@ -45,4 +45,17 @@ class Customer extends Model
     {
         return $this->hasMany(Sale::class);
     }
+
+
+    /* public function segmentions(): HasMany
+    {
+        return $this->hasMany(Segmentation::class);
+    } */
+
+
+    public function segmentations()
+    {
+        return $this->belongsToMany(Segmentation::class, 'segment_registers', 'customer_id', 'segment_id')
+                    ->withTimestamps(); // Esto indica que la relación es many-to-many
+    }
 }

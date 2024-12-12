@@ -32,4 +32,5 @@ class PaymentMethod extends Model
     {
         return $this->hasMany(Sale::class);
     }
+
 }

@@ -2,32 +2,33 @@
 
 namespace App\Filament\Pages;
 
-use App\Helpers\EvolutionAPI;
-use App\Mail\SegmentEmail;
 use App\Models\City;
-use App\Models\Config;
 use App\Models\Sale;
+use App\Models\Config;
+use App\Models\Customer;
+use App\Models\Template;
 use Filament\Pages\Page;
+use App\Mail\SegmentEmail;
 use App\Models\Department;
+use App\Utils\FormatUtils;
 use Filament\Tables\Table;
 use App\Models\Segmentation;
+use App\Helpers\EvolutionAPI;
 use App\Models\SegmentRegister;
-use App\Models\Template;
-use App\Utils\FormatUtils;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Select;
+use Illuminate\Support\HtmlString;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\Filter;
+use Illuminate\Support\Facades\Mail;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
+use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Tables\Contracts\HasTable;  // Añade esta interfaz
 use Filament\Tables\Concerns\InteractsWithTable; // Añade este trait
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\HtmlString;
-use Filament\Notifications\Notification;
 
 class TableSegmentionsPage extends Page implements HasTable
 {
@@ -38,7 +39,7 @@ class TableSegmentionsPage extends Page implements HasTable
     protected static string $view = 'filament.pages.table-segmentions-page';
 
     protected static ?string $title = 'Tabla de Segmentaciones';
-    protected static ?string $model = Sale::class;
+    protected static ?string $model = Segmentation::class;
 
 
     public $data;
@@ -47,108 +48,49 @@ class TableSegmentionsPage extends Page implements HasTable
     {
         return $table
             ->query(
-                SegmentRegister::query()
+                Segmentation::query()
                     ->latest()
-                    ->with(['segment', 'sale.customer', 'sale.shop', 'sale.seller', 'sale.paymentMethod', 'sale.returnAlert'])
+                    ->with(['customers', 'customers.sales'])
             )
             ->columns([
-                TextColumn::make('segment.type')
-                    ->label('Seg'),
-                TextColumn::make('sale.customer.customer_name')
-                    ->label('Cliente'),
-                TextColumn::make('sale.customer.first_name')
-                    ->label('Primer Nombre'),
-                TextColumn::make('sale.customer.phone')
-                    ->label('Teléfono'),
-                TextColumn::make('sale.customer.email')
-                    ->label('Correo'),
-                TextColumn::make('sale.customer.city.name')
-                    ->label('Ciudad'),
-                TextColumn::make('sale.customer.city.department.name')
-                    ->label('Departamento'),
-                TextColumn::make('sale.orders_number')
-                    ->label('Ordenes'),
-                TextColumn::make('sale.delivered')
-                    ->label('Entradas'),
-                TextColumn::make('sale.returns_number')
-                    ->label('Devoluciones'),
-                TextColumn::make('sale.date_first_order')
-                    ->label('Fecha primera orden'),
-                TextColumn::make('sale.date_last_order')
-                    ->label('Fecha última orden'),
-                TextColumn::make('sale.last_order_date_delivered')
-                    ->label('Fecha última orden entregada'),
-                TextColumn::make('sale.total_revenues')
+                TextColumn::make('id')
+                    ->label('ID'),
+                TextColumn::make('name')
+                    ->label('Nombre segmento'),
+                TextColumn::make('created_at')
+                    ->label('Fecha de creación'),
+                TextColumn::make('customers.customer_name')
+                    ->label('Participantes'),
+                TextColumn::make('customers.sales.total_sales')
+                    ->label('Ventas'),
+
+                    
+                TextColumn::make('customers.sales.total_revenues')
                     ->label('Ingresos'),
-                TextColumn::make('sale.return_value')
-                    ->label('Valor devoluciones'),
-                TextColumn::make('sale.paymentMethod.name')
-                    ->label('Método de pago'),
-                TextColumn::make('sale.seller.name')
-                    ->label('Vendedor'),
-                TextColumn::make('sale.customer.is_frequent_customer')
-                    ->label('Es común'),
-                TextColumn::make('sale.shop.name')
-                    ->label('Tienda'),
-                TextColumn::make('sale.last_item_purchased')
-                    ->label('Último item comprado'),
-                TextColumn::make('sale.previous_last_item_purchased')
-                    ->label('Antepenúltimo item comprado'),
-                TextColumn::make('sale.days_since_last_purchase')
-                    ->label('Días desde última compra'),
-                TextColumn::make('sale.returnAlert.type')
-                    ->label('Alerta de Devolución'),
+
+
+                TextColumn::make('customers.sales.return_value')
+                    ->label('Valor Devoluciones'),
+
+
+
+                TextColumn::make('customers.sales.returns_number')
+                    ->label('Suma ingresos devoluciones'),
+
+
+                TextColumn::make('customers.sales.orders_number')
+                    ->label('Ordenes'),
+                    
+                TextColumn::make('customers.sales.delivered')
+                    ->label('Entregadas'),
+
+
+
+                TextColumn::make('customers.sales.returns_number')
+                    ->label('Devoluciones'),
+
             ])
-            ->filters([
-                SelectFilter::make('segment.type')
-                    ->label('Seg')
-                    ->searchable()
-                    ->multiple()
-                    ->preload()
-                    ->relationship('segment', 'type'),
-                SelectFilter::make('sale.customer.customer_name')
-                    ->label('Cliente')
-                    ->searchable()
-                    ->multiple()
-                    ->preload()
-                    ->relationship('sale.customer', 'customer_name'),
-                SelectFilter::make('sale.customer.city.name')
-                    ->label('Ciudad')
-                    ->searchable()
-                    ->multiple()
-                    ->preload()
-                    ->relationship('sale.customer.city', 'name'),
-                SelectFilter::make('sale.customer.city.department.name')
-                    ->label('Departamento')
-                    ->searchable()
-                    ->multiple()
-                    ->preload()
-                    ->relationship('sale.customer.city.department', 'name'),
-                SelectFilter::make('sale.paymentMethod')
-                    ->label('Método de pago')
-                    ->searchable()
-                    ->multiple()
-                    ->preload()
-                    ->relationship('sale.paymentMethod', 'name'),
-                SelectFilter::make('sale.seller')
-                    ->label('Vendedor')
-                    ->searchable()
-                    ->multiple()
-                    ->preload()
-                    ->relationship('sale.seller', 'name'),
-                SelectFilter::make('sale.shop')
-                    ->label('Tienda')
-                    ->searchable()
-                    ->multiple()
-                    ->preload()
-                    ->relationship('sale.shop', 'name'),
-                SelectFilter::make('sale.returnAlert')
-                    ->label('Alerta de Devolución')
-                    ->searchable()
-                    ->multiple()
-                    ->preload()
-                    ->relationship('sale.returnAlert', 'type'),
-            ])
+            ->filters([])
             ->bulkActions([
                 BulkAction::make('send_email')
                     ->label('Enviar Correo')
@@ -229,13 +171,12 @@ class TableSegmentionsPage extends Page implements HasTable
                                 ];
 
                                 Mail::to($email)->send(new SegmentEmail($mailData, $data['attachment'] ?? null));
-                                
                             }
 
                             Notification::make()
-                                    ->title('Correo enviado exitosamente')
-                                    ->success()
-                                    ->send();
+                                ->title('Correo enviado exitosamente')
+                                ->success()
+                                ->send();
                         }
                     }),
 
@@ -357,12 +298,11 @@ class TableSegmentionsPage extends Page implements HasTable
                                     'SALES'
                                 );
                             }
-                            
                         }
                         Notification::make()
-                                    ->title('Mensaje enviado exitosamente')
-                                    ->success()
-                                    ->send();
+                            ->title('Mensaje enviado exitosamente')
+                            ->success()
+                            ->send();
                     }),
             ]);
     }

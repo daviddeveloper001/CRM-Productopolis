@@ -7,15 +7,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SegmentRegister extends Model
 {
-    protected $fillable = ['segment_id', 'sale_id'];
+    protected $fillable = ['segment_id', 'customer_id'];
 
-    public function segment() : BelongsTo
-    {
-        return $this->belongsTo(Segmentation::class);
-    }
 
-    public function sale() : BelongsTo
-    {
-        return $this->belongsTo(Sale::class);
-    }
+    protected $table = 'segment_registers';
+
 }

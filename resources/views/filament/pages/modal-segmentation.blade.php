@@ -1,4 +1,10 @@
 <div>
+    {{-- <div class="mb-4">
+        <label for="segmentName mb-2">Nombre del Segmento</label>
+    </div>
+    <div class="mb-4">
+        <input type="text" wire:model="segmentName" placeholder="Nombre del Segmento">
+    </div> --}}
     @if (!$customersByPaymentMethod['query']->isEmpty())
         <h2 class="text-lg font-bold">Clientes por Método de Pago</h2>
 
@@ -47,19 +53,6 @@
 
     @endif
 
-    @if (!$getCustomersBySegmentation['query']->isEmpty())
-        <h2 class="text-lg font-bold mt-6">Clientes por Segmentación</h2>
-        <ul class="list-disc list-inside">
-            @foreach ($getCustomersBySegmentation['segmentations'] as $segmentation)
-                @if ($segmentation->customers_count != 0)
-                    <li>
-                        <strong>{{ $segmentation->type }}</strong>:
-                        {{ $segmentation->customers_count ?? 0 }} clientes
-                    </li>
-                @endif
-            @endforeach
-        </ul>
-    @endif
 
     @if (!$customersByShop['query']->isEmpty())
         <h2 class="text-lg font-bold mt-6">Clientes por Tiendas</h2>
@@ -91,17 +84,17 @@
     @endif
 
     @if (!$customersByDepartment['query']->isEmpty())
-    <h2 class="text-lg font-bold mt-6">Clientes por Departamento</h2>
-    <ul class="list-disc list-inside">
-        @foreach ($customersByDepartment['departments'] as $department)
-            @if ($department['customers_count'] != 0)
-                <li>
-                    <strong>{{ $department['name'] }}</strong>:
-                    {{ $department['customers_count'] ?? 0 }} clientes
-                </li>
-            @endif
-        @endforeach
-    </ul>
-@endif
+        <h2 class="text-lg font-bold mt-6">Clientes por Departamento</h2>
+        <ul class="list-disc list-inside">
+            @foreach ($customersByDepartment['departments'] as $department)
+                @if ($department['customers_count'] != 0)
+                    <li>
+                        <strong>{{ $department['name'] }}</strong>:
+                        {{ $department['customers_count'] ?? 0 }} clientes
+                    </li>
+                @endif
+            @endforeach
+        </ul>
+    @endif
 
 </div>

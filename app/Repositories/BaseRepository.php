@@ -18,7 +18,7 @@ class BaseRepository implements BaseRepositoryInterface
     public function all()
     {
         $query = $this->model->latest();
-        if(! empty($this->relations)) {
+        if (! empty($this->relations)) {
             $query->with($this->relations);
         }
         return $query->get();
@@ -28,7 +28,7 @@ class BaseRepository implements BaseRepositoryInterface
     public function find(Model $model)
     {
         $query = $this->model;
-        if(! empty($this->relations)) {
+        if (! empty($this->relations)) {
             $query->with($this->relations);
         }
         return $query->find($model);
@@ -55,7 +55,7 @@ class BaseRepository implements BaseRepositoryInterface
     }
 
     public function findBy(array $criteria)
-{
-    return $this->model->where($criteria)->first();
-}
+    {
+        return $this->model->where($criteria)->first();
+    }
 }
