@@ -1,10 +1,8 @@
 <div>
-    {{-- <div class="mb-4">
-        <label for="segmentName mb-2">Nombre del Segmento</label>
-    </div>
     <div class="mb-4">
-        <input type="text" wire:model="segmentName" placeholder="Nombre del Segmento">
-    </div> --}}
+        <h3>{{ $getNameForm }}</h3>
+        <div>@error('name_segment') {{ $message }} @enderror</div>
+    </div>
     @if (!$customersByPaymentMethod['query']->isEmpty())
         <h2 class="text-lg font-bold">Clientes por Método de Pago</h2>
 

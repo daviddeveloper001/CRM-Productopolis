@@ -3,26 +3,28 @@
 namespace App\Filament\Pages;
 
 use App\Models\City;
-use App\Models\Customer;
 use App\Models\Sale;
 use App\Models\Shop;
 use App\Models\Seller;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use App\Models\Customer;
 use Filament\Pages\Page;
 use App\Models\Department;
 use App\Models\ReturnAlert;
 use App\Models\Segmentation;
 use Filament\Actions\Action;
 use App\Models\PaymentMethod;
-use App\Models\SegmentionRegister;
 use App\Models\SegmentRegister;
 use Faker\Provider\ar_EG\Payment;
+use App\Models\SegmentionRegister;
 use Illuminate\Contracts\View\View;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
-use Illuminate\Database\Eloquent\Collection;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Collection;
 
 class GenerateSegmentFormPage extends Page
 {
@@ -32,9 +34,12 @@ class GenerateSegmentFormPage extends Page
 
     protected static ?string $title = 'Generar segmento';
 
+    public $is_unique = true;
+
     //protected static ?string $model = Sale::class;
 
     public $formData = [];
+    
 
     public function mount()
     {
@@ -46,11 +51,11 @@ class GenerateSegmentFormPage extends Page
 
         // Ejecutar la consulta
         //$query = Sale::with(['customer', 'paymentMethod', 'shop', 'seller', 'returnAlert']);
-        
+
         $query = Customer::with(['sales', 'sales.paymentMethod', 'sales.shop', 'sales.seller', 'sales.returnAlert']);
-        
-        
-        
+
+
+
         $filters = [
             'payment_method_id' => $this->formData['payment_method_id'] ?? null,
             'return_alert_id'   => $this->formData['alert'] ?? null,
@@ -59,7 +64,7 @@ class GenerateSegmentFormPage extends Page
             'seller_id'         => $this->formData['seller_id'] ?? null,
             'shop_id'           => $this->formData['shop_id'] ?? null,
         ];
-        
+
 
         $query->whereHas('sales', function ($salesQuery) use ($filters) {
             foreach ($filters as $column => $value) {
@@ -71,8 +76,8 @@ class GenerateSegmentFormPage extends Page
                 }
             }
         });
-        
-        
+
+
 
 
         /* $daysFromPurchase = $this->formData['days_from_purchase'] ?? null;
@@ -105,13 +110,11 @@ class GenerateSegmentFormPage extends Page
         }
 
         Notification::make()
-        ->title('Segmento generado correctamente')
-        ->success()
-        ->send();
+            ->title('Segmento generado correctamente')
+            ->success()
+            ->send();
 
         return redirect()->route('table-segmentations');
-
-
     }
 
 
@@ -121,11 +124,14 @@ class GenerateSegmentFormPage extends Page
         return Action::make('submit')
             ->label('Generar segmento')
             ->action(function () {
+
                 $this->submit();
             })
             ->modalContent(fn(): View => view(
                 'filament.pages.modal-segmentation',
                 [
+                    'getNameForm' => $this->getNameForm(),
+
                     'customersByPaymentMethod' => [
                         'query' => $this->getCustomersByPaymentMethod()['query'],
                         'payments' => $this->getCustomersByPaymentMethod()['payments']
@@ -158,28 +164,35 @@ class GenerateSegmentFormPage extends Page
             ->modalCancelActionLabel('Cancelar');
     }
 
+    protected function getNameForm()
+    {
+        $segmentName = $this->formData["name_segment"] ?? null;
+
+        return $segmentName;
+    }
+
     protected function getCustomersByPaymentMethod()
     {
         $paymentMethodId = $this->formData["payment_method_id"] ?? null;
-        
+
         $payments = PaymentMethod::withCount(['sales as customers_count' => function ($query) {
             $query->distinct('customer_id');
         }])->get();
-        
-        
+
+
         if (is_null($paymentMethodId)) {
             return [
                 'query' => collect(),
                 'payments' => $payments,
             ]; // Retorna una colección vacía pero con las segmentaciones.
         }
-        
+
         // Obtener los clientes específicos de la segmentación seleccionada
         $query = Sale::where('payment_method_id', $paymentMethodId)
-        ->with('customer.sales.paymentMethod') // Cargar la relación con clientes
-        ->get()
-        ->pluck('customer');
-        
+            ->with('customer.sales.paymentMethod') // Cargar la relación con clientes
+            ->get()
+            ->pluck('customer');
+
         return [
             'query' => $query,
             'payments' => $payments,
@@ -375,7 +388,6 @@ class GenerateSegmentFormPage extends Page
 
     protected function getFormSchema(): array
     {
-        /* return Sale::getForm(); */
         return [
             Section::make('Información del segmento')
                 ->columns([
@@ -387,7 +399,21 @@ class GenerateSegmentFormPage extends Page
                     TextInput::make('name_segment')
                         ->label('Nombre del Segmento')
                         ->required()
-                        ->unique()
+                        ->live(debounce: 500)
+                        ->afterStateUpdated(function (callable $set, ?string $state) {
+                            try {
+                                if ($state && trim($state) !== '') {
+                                    $exists = Segmentation::where('name', $state)->exists();
+                                    $set('is_unique', !$exists);
+                                }
+                            } catch (\Exception $e) {
+                                // Maneja errores silenciosamente o muestra un mensaje personalizado
+                                $set('is_unique', false);
+                            }
+                        })
+                        ->helperText(fn ($get) => $get('is_unique') === false 
+                        ? 'Este nombre ya está registrado. Por favor, elija otro.' 
+                        : '')                    
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,
@@ -400,6 +426,7 @@ class GenerateSegmentFormPage extends Page
                     'xl' => 4,
                     '2xl' => 8,
                 ])
+                ->hidden(fn (Get $get): bool => ! $get('name_segment'))
                 ->schema([
                     /* TextInput::make('days_from_purchase')
                         ->label('Días desde Compra')

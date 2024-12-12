@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Template extends Model
 {
@@ -19,4 +20,11 @@ class Template extends Model
         'type',
         'content',
     ];
+
+
+    public function campaign() : HasMany
+    {
+        return $this->hasMany(Campaign::class);
+    }
+
 }

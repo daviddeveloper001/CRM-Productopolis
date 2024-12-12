@@ -217,6 +217,33 @@ class TableSegmentionsPage extends Page implements HasTable
                             ])
                             ->live(),
                     ])
+                    /* ->action(function (Collection $records, array $data) {
+                        foreach ($records as $segmentRegister) {
+                            $segmentRegister->load('sale.customer');
+                            $email = $segmentRegister->sale->customer->email;
+
+                            if ($email) {
+                                $template = Template::find($data['template']);
+                                $messageContent = FormatUtils::replaceSalePlaceholders(
+                                    $template->content,
+                                    $segmentRegister->sale->id
+                                );
+
+                                $mailData = [
+                                    'name' => $segmentRegister->sale->customer->customer_name,
+                                    'message' => $messageContent,
+                                    'attachment_url' => isset($data['attachment']) ? url('storage/' . $data['attachment']) : "",
+                                ];
+
+                                Mail::to($email)->send(new SegmentEmail($mailData, $data['attachment'] ?? null));
+                            }
+
+                            Notification::make()
+                                ->title('Correo enviado exitosamente')
+                                ->success()
+                                ->send();
+                        }
+                    }), */
                     ->action(function (Collection $records, array $data) {
                         foreach ($records as $segmention) {
                             
@@ -227,9 +254,10 @@ class TableSegmentionsPage extends Page implements HasTable
                                 $email = $customer->email;
                                 if ($email) {
                                     $template = Template::find($data['template']);
+
                                     $messageContent = FormatUtils::replaceSalePlaceholders(
                                         $template->content,
-                                        $segmention->customer->id
+                                        $customer->sales->id
                                     );
     
                                     $mailData = [
