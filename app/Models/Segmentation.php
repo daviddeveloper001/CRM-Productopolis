@@ -31,7 +31,7 @@ class Segmentation extends Model
         'id' => 'integer',
     ];
 
-     public function sales(): HasMany
+    public function sales(): HasMany
     {
         return $this->hasMany(Sale::class);
     }
@@ -40,7 +40,7 @@ class Segmentation extends Model
     public function customers()
     {
         return $this->belongsToMany(Customer::class, 'segment_registers', 'segment_id', 'customer_id')
-                    ->withTimestamps(); // Indica una relación many-to-many
+            ->withTimestamps(); // Indica una relación many-to-many
     }
 
     public function registers()

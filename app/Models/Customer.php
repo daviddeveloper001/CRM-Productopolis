@@ -58,4 +58,5 @@ class Customer extends Model
         return $this->belongsToMany(Segmentation::class, 'segment_registers', 'customer_id', 'segment_id')
                     ->withTimestamps(); // Esto indica que la relación es many-to-many
     }
+    
 }

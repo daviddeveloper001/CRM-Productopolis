@@ -55,39 +55,104 @@ class TableSegmentionsPage extends Page implements HasTable
             ->columns([
                 TextColumn::make('id')
                     ->label('ID'),
+
                 TextColumn::make('name')
                     ->label('Nombre segmento'),
-                TextColumn::make('created_at')
-                    ->label('Fecha de creación'),
-                TextColumn::make('customers.customer_name')
-                    ->label('Participantes'),
-                TextColumn::make('customers.sales.total_sales')
-                    ->label('Ventas'),
 
-                    
+                TextColumn::make('created_at')
+                    ->label('Fecha de creación')
+                    ->since()
+                    ->dateTimeTooltip(),
+
+                TextColumn::make('customers.customer_name')
+                    ->label('Participantes')
+                    ->formatStateUsing(function ($state, $record) {
+                        return $record->customers->count();
+                    }),
+
+                TextColumn::make('customers.sales.total_sales')
+                    ->label('Ventas')
+                    ->formatStateUsing(function ($state, $record) {
+                        $totalSales = 0;
+
+                        foreach ($record->customers as $customer) {
+                            $totalSales += collect($customer->sales)->sum('total_sales');
+                        }
+
+                        return '$ ' . number_format($totalSales, 2);
+                    }),
+
+
                 TextColumn::make('customers.sales.total_revenues')
-                    ->label('Ingresos'),
+                    ->label('Ingresos')
+                    ->formatStateUsing(function ($state, $record) {
+                        $totalRevenues = 0;
+
+                        foreach ($record->customers as $customer) {
+                            $totalRevenues += collect($customer->sales)->sum('total_revenues');
+                        }
+
+                        return '$ ' . number_format($totalRevenues, 2);
+                    }),
+
 
 
                 TextColumn::make('customers.sales.return_value')
-                    ->label('Valor Devoluciones'),
+                    ->label('Valor Devoluciones')
+                    ->formatStateUsing(function ($state, $record) {
+                        $totalReturnValues = 0;
+
+                        foreach ($record->customers as $customer) {
+                            $totalReturnValues += collect($customer->sales)->sum('return_value');
+                        }
+
+                        return '$ ' . number_format($totalReturnValues, 2);
+                    }),
 
 
 
-                TextColumn::make('customers.sales.returns_number')
-                    ->label('Suma ingresos devoluciones'),
+                /* TextColumn::make('customers.sales.returns_number')
+                    ->label('Suma ingresos devoluciones'), */
 
 
                 TextColumn::make('customers.sales.orders_number')
-                    ->label('Ordenes'),
-                    
+                    ->label('Ordenes')
+                    ->formatStateUsing(function ($state, $record) {
+                        $totalOrderNumbers = 0;
+
+                        foreach ($record->customers as $customer) {
+                            $totalOrderNumbers += collect($customer->sales)->sum('orders_number');
+                        }
+
+                        return $totalOrderNumbers;
+                    }),
+
                 TextColumn::make('customers.sales.delivered')
-                    ->label('Entregadas'),
+                    ->label('Entregadas')
+                    ->formatStateUsing(function ($state, $record) {
+                        $totalDelivereds = 0;
+
+                        foreach ($record->customers as $customer) {
+                            $totalDelivereds += collect($customer->sales)->sum('delivered');
+                        }
+
+                        return $totalDelivereds;
+                    }),
 
 
 
                 TextColumn::make('customers.sales.returns_number')
-                    ->label('Devoluciones'),
+                    ->label('Devoluciones')
+                    ->numeric()
+                    ->formatStateUsing(function ($state, $record) {
+                        $totalReturnNumbers = 0;
+
+                        foreach ($record->customers as $customer) {
+                            $totalReturnNumbers += collect($customer->sales)->sum('returns_number');
+                        }
+
+                        return $totalReturnNumbers;
+                    }),
 
             ])
             ->filters([])
@@ -153,30 +218,36 @@ class TableSegmentionsPage extends Page implements HasTable
                             ->live(),
                     ])
                     ->action(function (Collection $records, array $data) {
-                        foreach ($records as $segmentRegister) {
-                            $segmentRegister->load('sale.customer');
-                            $email = $segmentRegister->sale->customer->email;
-
-                            if ($email) {
-                                $template = Template::find($data['template']);
-                                $messageContent = FormatUtils::replaceSalePlaceholders(
-                                    $template->content,
-                                    $segmentRegister->sale->id
-                                );
-
-                                $mailData = [
-                                    'name' => $segmentRegister->sale->customer->customer_name,
-                                    'message' => $messageContent,
-                                    'attachment_url' => isset($data['attachment']) ? url('storage/' . $data['attachment']) : "",
-                                ];
-
-                                Mail::to($email)->send(new SegmentEmail($mailData, $data['attachment'] ?? null));
+                        foreach ($records as $segmention) {
+                            
+                            $segmention->load('customers');
+                            
+                            $customers = $segmention->customers;
+                            foreach ($customers as $customer) {
+                                $email = $customer->email;
+                                if ($email) {
+                                    $template = Template::find($data['template']);
+                                    $messageContent = FormatUtils::replaceSalePlaceholders(
+                                        $template->content,
+                                        $segmention->customer->id
+                                    );
+    
+                                    $mailData = [
+                                        'name' => $segmention->sale->customer->customer_name,
+                                        'message' => $messageContent,
+                                        'attachment_url' => isset($data['attachment']) ? url('storage/' . $data['attachment']) : "",
+                                    ];
+    
+                                    Mail::to($email)->send(new SegmentEmail($mailData, $data['attachment'] ?? null));
+                                }
+    
+                                Notification::make()
+                                    ->title('Correo enviado exitosamente')
+                                    ->success()
+                                    ->send();
                             }
 
-                            Notification::make()
-                                ->title('Correo enviado exitosamente')
-                                ->success()
-                                ->send();
+                            
                         }
                     }),
 
