@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CampaignResource\Pages;
 use App\Filament\Resources\CampaignResource\RelationManagers;
 use App\Models\Campaign;
+use App\Models\Template;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -34,8 +35,11 @@ class CampaignResource extends Resource
                     ->required()
                     ->maxLength(400),
                 Forms\Components\Select::make('template_id')
-                    ->label('Plantillas')
-                    ->relationship('template', 'name')
+                    ->label('Plantilla')
+                    ->options([
+                        'WhatsApp' => Template::where('type', 'whatsapp')->pluck('name', 'id')->toArray(),
+                        'E-mail' => Template::where('type', 'email')->pluck('name', 'id')->toArray(),
+                    ])
                     ->required(),
             ]);
     }

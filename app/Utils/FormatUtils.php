@@ -2,6 +2,7 @@
 
 namespace App\Utils;
 
+use App\Models\Customer;
 use App\Models\Sale;
 
 
@@ -23,21 +24,19 @@ class FormatUtils
         return nl2br($text);
     }
 
-    static function replaceSalePlaceholders($content, $saleId)
+    static function replaceCustomerPlaceholders($content, $customer_id)
     {
-        $sale = Sale::find($saleId);
+        $customer = Customer::find($customer_id);
 
-        if (!$sale) {
+        if (!$customer) {
             return $content;
         }
 
         $placeholders = [
-            '[NOMBRE-CLIENTE]' => $sale->customer->customer_name,
-            '[TELEFONO-CLIENTE]' => $sale->customer->phone,
-            '[EMAIL-CLIENTE]' => $sale->customer->email,
-            '[CIUDAD-CLIENTE]' => $sale->customer->city->name,
-            '[VENDEDOR]' => $sale->seller->name,
-            '[TIENDA]' => $sale->shop->name,
+            '[NOMBRE-CLIENTE]' => $customer->customer_name,
+            '[TELEFONO-CLIENTE]' => $customer->phone,
+            '[EMAIL-CLIENTE]' => $customer->email,
+            '[CIUDAD-CLIENTE]' => $customer->city->name
         ];
 
         foreach ($placeholders as $placeholder => $value) {

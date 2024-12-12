@@ -61,6 +61,12 @@ class TableSegmentionsPage extends Page implements HasTable
                 TextColumn::make('name')
                     ->label('Nombre segmento'),
 
+                TextColumn::make('campaign.name')
+                    ->label('Campaña')
+                    ->formatStateUsing(function ($state) {
+                        return $state ?? '--';
+                    }),
+
                 TextColumn::make('created_at')
                     ->label('Fecha de creación')
                     ->since()
@@ -222,7 +228,7 @@ class TableSegmentionsPage extends Page implements HasTable
                                 }
 
                                 return new HtmlString(
-                                    FormatUtils::replaceSalePlaceholders(
+                                    FormatUtils::replaceCustomerPlaceholders(
                                         $template->content,
                                         $saleId
                                     )
@@ -251,7 +257,7 @@ class TableSegmentionsPage extends Page implements HasTable
 
                             if ($email) {
                                 $template = Template::find($data['template']);
-                                $messageContent = FormatUtils::replaceSalePlaceholders(
+                                $messageContent = FormatUtils::replaceCustomerPlaceholders(
                                     $template->content,
                                     $segmentRegister->sale->id
                                 );
@@ -282,7 +288,7 @@ class TableSegmentionsPage extends Page implements HasTable
                                 if ($email) {
                                     $template = Template::find($data['template']);
 
-                                    $messageContent = FormatUtils::replaceSalePlaceholders(
+                                    $messageContent = FormatUtils::replaceCustomerPlaceholders(
                                         $template->content,
                                         $customer->sales->id
                                     );
@@ -341,7 +347,7 @@ class TableSegmentionsPage extends Page implements HasTable
                                 }
 
                                 return new HtmlString(
-                                    FormatUtils::replaceSalePlaceholders(
+                                    FormatUtils::replaceCustomerPlaceholders(
                                         FormatUtils::parseWhatsAppFormatting($template->content),
                                         $saleId
                                     )
@@ -377,7 +383,7 @@ class TableSegmentionsPage extends Page implements HasTable
 
                                     $dataToSend = [
                                         'phone' => $record->sale->customer->phone,
-                                        'message' => FormatUtils::replaceSalePlaceholders(
+                                        'message' => FormatUtils::replaceCustomerPlaceholders(
                                             Template::find($data['template'])->content,
                                             $record->sale->id
                                         ),
@@ -405,7 +411,7 @@ class TableSegmentionsPage extends Page implements HasTable
                             foreach ($records as $record) {
                                 $dataToSend = [
                                     'phone' => $record->sale->customer->phone,
-                                    'message' => FormatUtils::replaceSalePlaceholders(
+                                    'message' => FormatUtils::replaceCustomerPlaceholders(
                                         Template::find($data['template'])->content,
                                         $record->sale->id
                                     ),
