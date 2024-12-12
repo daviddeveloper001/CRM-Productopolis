@@ -26,9 +26,11 @@ use Filament\Notifications\Notification;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Collection;
-use Filament\Tables\Contracts\HasTable;  // Añade esta interfaz
-use Filament\Tables\Concerns\InteractsWithTable; // Añade este trait
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Support\Enums\Alignment;
 
 class TableSegmentionsPage extends Page implements HasTable
 {
@@ -156,6 +158,31 @@ class TableSegmentionsPage extends Page implements HasTable
 
             ])
             ->filters([])
+            ->actions([
+                Action::make('Reporte')
+                    ->form([
+                        TextInput::make('name')
+                            ->label('Nombre')
+                    ])
+                    ->action(function ($record): void {
+                        $customers = $record->customers;
+                        $cont = 0;
+                        foreach ($customers as $customer) {
+
+
+                            $customerlastSale = Sale::where('customer_id', $customer->id)
+                                ->orderBy('date_last_order', 'desc')
+                                ->first();
+                            foreach ($customer->sales as $sale) {
+                                if ($customerlastSale && $customerlastSale->date_last_order > $sale->date_last_order) {
+                                    $cont++;
+                                    continue;
+                                }
+                            }
+                        }
+                    })
+                    ->slideOver()
+            ])
             ->bulkActions([
                 BulkAction::make('send_email')
                     ->label('Enviar Correo')
@@ -246,9 +273,9 @@ class TableSegmentionsPage extends Page implements HasTable
                     }), */
                     ->action(function (Collection $records, array $data) {
                         foreach ($records as $segmention) {
-                            
+
                             $segmention->load('customers');
-                            
+
                             $customers = $segmention->customers;
                             foreach ($customers as $customer) {
                                 $email = $customer->email;
@@ -259,23 +286,21 @@ class TableSegmentionsPage extends Page implements HasTable
                                         $template->content,
                                         $customer->sales->id
                                     );
-    
+
                                     $mailData = [
                                         'name' => $segmention->sale->customer->customer_name,
                                         'message' => $messageContent,
                                         'attachment_url' => isset($data['attachment']) ? url('storage/' . $data['attachment']) : "",
                                     ];
-    
+
                                     Mail::to($email)->send(new SegmentEmail($mailData, $data['attachment'] ?? null));
                                 }
-    
+
                                 Notification::make()
                                     ->title('Correo enviado exitosamente')
                                     ->success()
                                     ->send();
                             }
-
-                            
                         }
                     }),
 
