@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Campaign;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Segmentation extends Model
 {
@@ -49,8 +50,8 @@ class Segmentation extends Model
         return $this->hasMany(SegmentRegister::class);
     }
 
-    public function campaign()
+    public function campaign() : HasMany
     {
-        return $this->belongsTo(Campaign::class);
+        return $this->hasMany(Campaign::class);
     }
 }

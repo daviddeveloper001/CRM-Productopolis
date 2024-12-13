@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Campaign extends Model
 {
-    protected $fillable = ['name', 'template_id'];
+    protected $fillable = ['name', 'segment_id', 'start_date', 'end_date'];
 
-    public function template() : BelongsTo
+    public function segment() : BelongsTo
     {
-        return $this->belongsTo(Template::class);
+        return $this->belongsTo(Segmentation::class);
     }
 }

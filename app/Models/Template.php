@@ -27,4 +27,9 @@ class Template extends Model
         return $this->hasMany(Campaign::class);
     }
 
+    public function blocks() : HasMany
+    {
+        return $this->hasMany(Block::class);
+    }
+
 }
