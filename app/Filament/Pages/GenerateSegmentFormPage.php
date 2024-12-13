@@ -19,6 +19,7 @@ use App\Models\PaymentMethod;
 use App\Models\SegmentRegister;
 use Faker\Provider\ar_EG\Payment;
 use App\Models\SegmentionRegister;
+use App\Models\SegmentType;
 use App\Utils\FormatUtils;
 use Filament\Forms\Components\Placeholder;
 use Illuminate\Contracts\View\View;
@@ -56,7 +57,7 @@ class GenerateSegmentFormPage extends Page
         // Ejecutar la consulta
         //$query = Sale::with(['customer', 'paymentMethod', 'shop', 'seller', 'returnAlert']);
 
-        $query = Customer::with(['sales', 'sales.paymentMethod', 'sales.shop', 'sales.seller', 'sales.returnAlert']);
+        $query = Customer::with(['sales', 'sales.paymentMethod', 'sales.shop', 'sales.seller', 'sales.returnAlert', 'sales.segment_type']);
 
 
 
@@ -67,6 +68,7 @@ class GenerateSegmentFormPage extends Page
             'city_id'           => $this->formData['city_id'] ?? null,
             'seller_id'         => $this->formData['seller_id'] ?? null,
             'shop_id'           => $this->formData['shop_id'] ?? null,
+            'segment_type_id'   => $this->formData['segment_type_id'] ?? null,
         ];
 
 
@@ -160,6 +162,10 @@ class GenerateSegmentFormPage extends Page
                     'customersByDepartment' => [
                         'query' => $this->getCustomersByDepartment()['query'],
                         'departments' => $this->getCustomersByDepartment()['departments']
+                    ],
+                    'customersBySegmentType' => [
+                        'query' => $this->getCustomersBySegmentType()['query'],
+                        'segmentTypes' => $this->getCustomersBySegmentType()['segmentTypes']
                     ]
                 ]
             ))
@@ -386,6 +392,37 @@ class GenerateSegmentFormPage extends Page
         ];
     }
 
+
+
+    protected function getCustomersBySegmentType()
+    {
+        $segmentTypeId = $this->formData["segment_type_id"] ?? null;
+
+        $segmentTypes = SegmentType::withCount(['sales as customers_count' => function ($query) {
+            $query->distinct('customer_id');
+        }])->get();
+
+
+        if (is_null($segmentTypeId)) {
+            return [
+                'query' => collect(),
+                'segmentTypes' => $segmentTypes,
+            ]; // Retorna una colección vacía pero con las segmentaciones.
+        }
+
+        // Obtener los clientes específicos de la segmentación seleccionada
+        $query = Sale::where('segment_type_id', $segmentTypeId)
+            ->with('customer.sales.segment_type_id') // Cargar la relación con clientes
+            ->get()
+            ->pluck('customer');
+
+        return [
+            'query' => $query,
+            'segmentTypes' => $segmentTypes,
+        ];
+    }
+
+
     protected function getFormSchema(): array
     {
         return [
@@ -419,11 +456,6 @@ class GenerateSegmentFormPage extends Page
                             'xl' => 3,
                             '2xl' => 4,
                         ]),
-                    Select::make('campaign_id')
-                        ->label('Campaña')
-                        ->options(Campaign::all()->pluck('name', 'id'))
-                        ->preload()
-                        ->required()
                 ]),
             Section::make('Filtros de segmentación')
                 ->columns([
@@ -489,23 +521,23 @@ class GenerateSegmentFormPage extends Page
                             '2xl' => 4,
                         ]),
 
-                    /* TextInput::make('limit')
+                    TextInput::make('limit')
                         ->label('Limite')
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,
                             '2xl' => 4,
-                        ]), */
-                    /* Select::make('segmentation_id')
-                        ->label('Segmento')
+                        ]),
+                    Select::make('segment_type_id')
+                        ->label('Tipo de Segmento')
                         //->searchable()
                         ->preload()
-                        ->options(Segmentation::all()->pluck('type', 'id'))
+                        ->options(SegmentType::all()->pluck('name', 'id'))
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,
                             '2xl' => 4,
-                        ]), */
+                        ]),
 
                     Select::make('seller_id')
                         ->label('Vendedor')

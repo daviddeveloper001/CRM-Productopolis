@@ -95,4 +95,20 @@
         </ul>
     @endif
 
+    @if (!$customersBySegmentType['query']->isEmpty())
+        <h2 class="text-lg font-bold">Clientes por Tipo de Segmento</h2>
+
+        <ul class="list-disc list-inside">
+
+            @foreach ($customersBySegmentType['segmentTypes'] as $segmentType)
+                @if ($segmentType->customers_count != 0)
+                    <li>
+                        <strong>{{ $segmentType->name }}</strong>:
+                        {{ $segmentType->customers_count ?? 0 }} clientes
+                    </li>
+                @endif
+            @endforeach
+        </ul>
+    @endif
+
 </div>

@@ -19,6 +19,12 @@ class SegmentTypeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationGroup = 'Configuraciones';
+
+    protected static ?string $pluralModelLabel = 'Tipos de Segmento';
+
+    protected static ?string $modelLabel = 'Tipo de Segmento';
+
     public static function form(Form $form): Form
     {
         return $form

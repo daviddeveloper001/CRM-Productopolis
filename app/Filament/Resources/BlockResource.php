@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CampaignResource\Pages;
-use App\Filament\Resources\CampaignResource\RelationManagers;
+use App\Filament\Resources\BlockResource\Pages;
+use App\Filament\Resources\BlockResource\RelationManagers;
 use App\Models\Block;
-use App\Models\Campaign;
-use App\Models\Template;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -15,43 +13,41 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class CampaignResource extends Resource
+class BlockResource extends Resource
 {
-    protected static ?string $model = Campaign::class;
+    protected static ?string $model = Block::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationGroup = 'Configuraciones';
 
-    protected static ?string $pluralModelLabel = 'Campañas';
+    protected static ?string $pluralModelLabel = 'Blocks';
 
-    protected static ?string $modelLabel = 'Campaña';
+    protected static ?string $modelLabel = 'Block';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Campaña')
+                    ->label('Nombre')
                     ->required()
-                    ->maxLength(400),
-                Forms\Components\Select::make('segment_id')
-                    ->label('Segmento')
-                    ->relationship('segment', 'name')
+                    ->maxLength(255),
+                Forms\Components\Select::make('template_id')
+                    ->label('Plantilla')
+                    ->relationship('template', 'name')
                     ->required(),
                 Forms\Components\DatePicker::make('start_date')
                     ->label('Fecha de inicio')
                     ->required(),
                 Forms\Components\DatePicker::make('end_date')
-                    ->label('Fecha de inicio')
+                    ->label('Fecha de finalización')
                     ->required(),
-                Forms\Components\Select::make('block_id')
-                    ->label('Blocks')
-                    ->searchable()
-                    ->multiple()
-                    ->preload()
-                    ->options(Block::all()->pluck('name', 'id'))
-                    ->required(),
+                Forms\Components\TextInput::make('exit_criterion')
+                    ->label('Criterio de salida')
+                    ->required()
+                    ->maxLength(100),
+
             ]);
     }
 
@@ -60,20 +56,23 @@ class CampaignResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Campaña')
+                    ->label('Nombre')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('segment.name')
-                    ->label('Segmento')
+                Tables\Columns\TextColumn::make('template.name')
+                    ->label('Plantilla')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Fecha de inicio')
-                    ->numeric()
+                    ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('end_date')
                     ->label('Fecha de finalización')
-                    ->numeric()
+                    ->date()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('exit_criterion')
+                    ->label('Criterio de salida')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -82,6 +81,7 @@ class CampaignResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
             ])
             ->filters([
                 //
@@ -106,9 +106,9 @@ class CampaignResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCampaigns::route('/'),
-            'create' => Pages\CreateCampaign::route('/create'),
-            'edit' => Pages\EditCampaign::route('/{record}/edit'),
+            'index' => Pages\ListBlocks::route('/'),
+            'create' => Pages\CreateBlock::route('/create'),
+            'edit' => Pages\EditBlock::route('/{record}/edit'),
         ];
     }
 }
