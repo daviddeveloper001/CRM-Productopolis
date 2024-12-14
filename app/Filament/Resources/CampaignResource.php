@@ -43,10 +43,10 @@ class CampaignResource extends Resource
                     ->label('Fecha de inicio')
                     ->required(),
                 Forms\Components\DatePicker::make('end_date')
-                    ->label('Fecha de inicio')
+                    ->label('Fecha de finalización')
                     ->required(),
                 Forms\Components\Select::make('block_id')
-                    ->label('Blocks')
+                    ->label('Bloques')
                     ->searchable()
                     ->multiple()
                     ->preload()

@@ -21,9 +21,9 @@ class BlockResource extends Resource
 
     protected static ?string $navigationGroup = 'Configuraciones';
 
-    protected static ?string $pluralModelLabel = 'Blocks';
+    protected static ?string $pluralModelLabel = 'Bloques';
 
-    protected static ?string $modelLabel = 'Block';
+    protected static ?string $modelLabel = 'Bloque';
 
     public static function form(Form $form): Form
     {

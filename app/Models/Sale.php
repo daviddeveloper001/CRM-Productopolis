@@ -38,6 +38,7 @@ class Sale extends Model
         'previous_last_item_purchased',
         'days_since_last_purchase',
         'return_alert_id',
+        'segment_type_id',
     ];
 
     /**
@@ -59,6 +60,7 @@ class Sale extends Model
         'payment_method_id' => 'integer',
         'date_first_order' => 'date',
         'date_last_order' => 'date',
+        'segment_type_id' => 'integer',
     ];
 
     public function customer(): BelongsTo

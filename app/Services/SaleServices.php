@@ -19,6 +19,7 @@ class SaleServices
         private ReturnAlertServices $returnAlertServices,
         private CityServices $cityServices,
         private DepartmentServices $departmentServices,
+        private SegmentTypeServices $segmentTypeServices
 
     ) {}
 
@@ -26,16 +27,19 @@ class SaleServices
     {
         $response = [];
 
+       
+
         foreach ($salesData as $data) {
             try {
+                
 
                 $customer = Customer::where('phone', $data['telefono'])->first();
 
-
                 $department = $this->departmentServices->createDepartment(['name' => $data['departamento']]);
 
-
                 $city = $this->cityServices->createCity(['name' => $data['ciudad'], 'department_id' => $department->id]);
+                
+                $segmentType = $this->segmentTypeServices->createSegmentType(['name' => $data['segmentacion']]);
 
 
                 if (!$customer) {
@@ -61,6 +65,7 @@ class SaleServices
 
 
                 if ($lastSale && $lastSale->date_last_order >= $data['fecha_ultima_orden']) {
+                    
                     $response[] = [
                         'customer_phone' => $data['telefono'],
                         'message' => 'No se creó la venta: la fecha es menor o igual a la última venta registrada.',
@@ -86,7 +91,9 @@ class SaleServices
                     'previous_last_item_purchased' => $data['antepenultimo_item_comprado'],
                     'days_since_last_purchase' => $data['ultimos_dias_compra'],
                     'return_alert_id' => $returnAlert->id,
+                    'segment_type_id' => $segmentType->id,
                 ]);
+
 
                 $response[] = [
                     'customer_phone' => $data['telefono'],
