@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Block extends Model
 {
@@ -19,6 +20,11 @@ class Block extends Model
     public function template() : BelongsTo
     {
         return $this->belongsTo(Template::class);
+    }
+
+    public function customers() : BelongsToMany
+    {
+        return $this->belongsToMany(Customer::class, 'block_customer');
     }
     
 }

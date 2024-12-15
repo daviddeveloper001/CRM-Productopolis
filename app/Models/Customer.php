@@ -17,8 +17,8 @@ class Customer extends Model
      * @var array
      */
     protected $fillable = [
-        'customer_name',
         'first_name',
+        'last_name',
         'phone',
         'email',
         'is_frequent_customer',
@@ -57,6 +57,11 @@ class Customer extends Model
     {
         return $this->belongsToMany(Segmentation::class, 'segment_registers', 'customer_id', 'segment_id')
                     ->withTimestamps(); // Esto indica que la relación es many-to-many
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
     }
     
 }

@@ -27,25 +27,29 @@ class SaleServices
     {
         $response = [];
 
-       
+
 
         foreach ($salesData as $data) {
             try {
-                
+
 
                 $customer = Customer::where('phone', $data['telefono'])->first();
 
                 $department = $this->departmentServices->createDepartment(['name' => $data['departamento']]);
 
                 $city = $this->cityServices->createCity(['name' => $data['ciudad'], 'department_id' => $department->id]);
-                
+
                 $segmentType = $this->segmentTypeServices->createSegmentType(['name' => $data['segmentacion']]);
 
+                $fullName = explode(' ', trim($data['nombre_cliente']));
+                $firstName = $fullName[0] ?? null;
+                $lastName = implode(' ', array_slice($fullName, 1));
+               
 
                 if (!$customer) {
                     $customer = $this->customerServices->createCustomer([
-                        'customer_name' => $data['nombre_cliente'],
-                        'first_name' => $data['primer_nombre'],
+                        'first_name' => $firstName,
+                        'last_name' => $lastName,
                         'phone' => $data['telefono'],
                         'email' => $data['correo'],
                         'city_id' => $city->id,
@@ -65,12 +69,12 @@ class SaleServices
 
 
                 if ($lastSale && $lastSale->date_last_order >= $data['fecha_ultima_orden']) {
-                    
+
                     $response[] = [
                         'customer_phone' => $data['telefono'],
                         'message' => 'No se creó la venta: la fecha es menor o igual a la última venta registrada.',
                     ];
-                    continue; 
+                    continue;
                 }
 
                 $this->saleRepository->create([
