@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enum\EventEnum;
 use App\Filament\Resources\BlockResource\Pages;
 use App\Filament\Resources\BlockResource\RelationManagers;
 use App\Models\Block;
@@ -37,16 +38,15 @@ class BlockResource extends Resource
                     ->label('Plantilla')
                     ->relationship('template', 'name')
                     ->required(),
-                Forms\Components\DatePicker::make('start_date')
+                Forms\Components\DateTimePicker::make('start_date')
                     ->label('Fecha de inicio')
                     ->required(),
-                Forms\Components\DatePicker::make('end_date')
-                    ->label('Fecha de finalización')
-                    ->required(),
-                Forms\Components\TextInput::make('exit_criterion')
-                    ->label('Criterio de salida')
-                    ->required()
-                    ->maxLength(100),
+
+                Forms\Components\Select::make('exit_criterion')
+                ->label('Criterio de salida')
+                ->enum(EventEnum::class)
+                ->options(EventEnum::class),
+
 
             ]);
     }
@@ -64,11 +64,7 @@ class BlockResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Fecha de inicio')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('end_date')
-                    ->label('Fecha de finalización')
-                    ->date()
+                    ->dateTime()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('exit_criterion')
                     ->label('Criterio de salida')

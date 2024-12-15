@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSaleRequest;
 use App\Http\Requests\UpdateSaleRequest;
+use App\Models\Block;
 
 class SaleController extends Controller
 {
@@ -65,4 +66,5 @@ class SaleController extends Controller
     {
         //
     }
+
 }
