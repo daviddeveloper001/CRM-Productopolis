@@ -2,16 +2,42 @@
 
 namespace App\Services;
 
-use App\Repositories\CustomerRepository;
+use App\Models\Sale;
+use App\Models\Customer;
 use App\Repositories\SaleRepository;
+use App\Repositories\CustomerRepository;
 
 class CustomerServices
 {
-    public function __construct(private CustomerRepository $customerRepository){}
-    public function createCustomer(array $data)
+    public function __construct(private CustomerRepository $customerRepository) {}
+    public function createCustomer(array $data, int $cityId): Customer
     {
-        $customer = $this->customerRepository->findBy($data);
+        $searchCriteria = [
+            'phone' => $data['telefono']
+        ];
+        $customer = $this->customerRepository->findBy($searchCriteria);
 
-        return $customer ?: $this->customerRepository->create($data);
+        if (!$customer) {
+
+            $fullName = explode(' ', trim($data['nombre_cliente']));
+            $firstName = $fullName[0] ?? null;
+            $lastName = implode(' ', array_slice($fullName, 1));
+
+
+            $customerData = [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'phone' => $data['telefono'],
+                'email' => $data['correo'],
+                'is_frequent_customer' => $data['es_comun'] ?? false,
+                'city_id' => $cityId,
+            ];
+
+            $customer = $this->customerRepository->create($customerData);
+        }
+
+
+        return $customer;
     }
+
 }

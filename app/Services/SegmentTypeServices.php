@@ -8,8 +8,14 @@ class SegmentTypeServices
 {
     public function __construct(private SegmentTypeRepository $segmentTypeRepository) {}
 
-    public function createSegmentType(array $data) {
-        $segmentType = $this->segmentTypeRepository->findBy($data);
-        return $segmentType ?: $this->segmentTypeRepository->create($data);
+    public function createSegmentType(string $name) {
+
+        $searchCriteria = ['name' => $name];
+
+        // Preparamos el array de datos para crear
+        $segmentData = ['name' => $name];
+
+        $segmentType = $this->segmentTypeRepository->findBy($searchCriteria);
+        return $segmentType ?: $this->segmentTypeRepository->create($segmentData);
     }
 }

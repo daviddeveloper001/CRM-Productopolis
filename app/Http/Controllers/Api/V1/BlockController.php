@@ -2,60 +2,58 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Enum\EventEnum;
 use App\Models\Block;
+use App\Models\Customer;
 use Illuminate\Http\Request;
+use App\Services\CityServices;
+use App\Services\EventService;
+use App\Services\CustomerServices;
 use App\Http\Controllers\Controller;
+use App\Services\DepartmentServices;
 use Illuminate\Support\Facades\Http;
 
 class BlockController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct(private CityServices $cityServices, private DepartmentServices $departmentServices, private CustomerServices $customerServices, private EventService $eventServices) {}
     public function index()
     {
         $blocks = Block::all();
 
-
-
         foreach ($blocks as $key => $value) {
 
-            if($value->exit_criterion == 'Demostracion')
-            {
+            if ($value->exit_criterion == 'Demostracion') {
                 $response = Http::get('https://app.monaros.co/sistema/index.php/public_routes/get_clients_not_attend_demo');
 
-
-                
-                // Verificar si la respuesta fue exitosa
                 if ($response->successful()) {
-                    
+
                     $users = $response->json();
-                   
 
                     foreach ($users['data'] as $user) {
-                        if (!empty ($user['correo'])) {
-
+                        
+                        if (empty($user['ciudad']) || empty($user['departamento']) || empty($user['telefono']) || empty($user['correo'])) {
+                            continue;
                         }
+                    
+                        $department = $this->departmentServices->createDepartment($user['departamento']);
+
+                        $city = $this->cityServices->createCity($user['ciudad'], $department->id);
+                    
+                        $customer = $this->customerServices->createCustomer($user, $city->id);
+
+                        $customer->blocks()->syncWithoutDetaching([$value->id]);
+
+                        $event = $this->eventServices->createEvent($user, $customer->id);
                     }
                     
-                    
 
-                    //return response()->json($users);
+                    return response()->json($users);
                 }
 
-                
-            
-                // Manejar posibles errores
                 return response()->json([
                     'error' => 'No se logró conectar a la API'
                 ], $response->status());
             }
         }
-
-        
-
-
     }
 
     /**
@@ -77,10 +75,7 @@ class BlockController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Block $block)
-    {
-        
-    }
+    public function show(Block $block) {}
 
     /**
      * Show the form for editing the specified resource.

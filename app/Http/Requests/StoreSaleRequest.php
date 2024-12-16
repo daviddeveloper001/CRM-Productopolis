@@ -46,6 +46,7 @@ class StoreSaleRequest extends FormRequest
             'data.*.ultimo_item_comprado' => 'required|string|max:255',
             'data.*.antepenultimo_item_comprado' => 'nullable|string|max:255',
             'data.*.ultimos_dias_compra' => 'required|integer',
+            'data.*.es_comun' => 'required|string',
         ];
     }
 }

@@ -8,9 +8,14 @@ class DepartmentServices
 {
     public function __construct(private DepartmentRepository $departmentRepository){}
 
-    public function createDepartment(array $data)
+    public function createDepartment(string $name)
     {
-        $department = $this->departmentRepository->findBy($data);
-        return $department ?: $this->departmentRepository->create($data);
-    }
+
+        $searchCriteria = ['name' => $name];
+
+        $departmentData = ['name' => $name];
+
+        $department = $this->departmentRepository->findBy($searchCriteria);
+        return $department ?: $this->departmentRepository->create($departmentData);
+    }   
 }

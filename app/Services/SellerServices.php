@@ -7,9 +7,15 @@ use App\Repositories\SellerRepository;
 class SellerServices
 {
     public function __construct(private SellerRepository $sellerRepository){}
-    public function createSeller(array $data)
+    public function createSeller(string $name)
     {
-        $seller = $this->sellerRepository->findBy($data);
-        return $seller?: $this->sellerRepository->create($data);
+
+        $searchCriteria = ['name' => $name];
+
+        // Preparamos el array de datos para crear
+        $sellerData = ['name' => $name];
+
+        $seller = $this->sellerRepository->findBy($searchCriteria);
+        return $seller ?: $this->sellerRepository->create($sellerData);
     }
 }

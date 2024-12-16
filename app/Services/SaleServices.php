@@ -5,6 +5,8 @@ namespace App\Services;
 use Carbon\Carbon;
 use App\Models\Sale;
 use App\Models\Customer;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use App\Repositories\SaleRepository;
 
 class SaleServices
@@ -23,94 +25,76 @@ class SaleServices
 
     ) {}
 
-    public function createSale(array $salesData)
+    public function createSale(array $salesData): JsonResponse
     {
-        $response = [];
-
-
+        $responses = [];
 
         foreach ($salesData as $data) {
-            try {
-
-
-                $customer = Customer::where('phone', $data['telefono'])->first();
-
-                $department = $this->departmentServices->createDepartment(['name' => $data['departamento']]);
-
-                $city = $this->cityServices->createCity(['name' => $data['ciudad'], 'department_id' => $department->id]);
-
-                $segmentType = $this->segmentTypeServices->createSegmentType(['name' => $data['segmentacion']]);
-
-                $fullName = explode(' ', trim($data['nombre_cliente']));
-                $firstName = $fullName[0] ?? null;
-                $lastName = implode(' ', array_slice($fullName, 1));
-               
-
-                if (!$customer) {
-                    $customer = $this->customerServices->createCustomer([
-                        'first_name' => $firstName,
-                        'last_name' => $lastName,
-                        'phone' => $data['telefono'],
-                        'email' => $data['correo'],
-                        'city_id' => $city->id,
-                    ]);
-                }
-
-
-                $shop = $this->shopServices->createShop(['name' => $data['tienda']]);
-                $seller = $this->sellerServices->createSeller(['name' => $data['vendedor']]);
-                $paymentMethod = $this->paymentMethodServices->createPaymentMethod(['name' => $data['metodo_pago']]);
-                $returnAlert = $this->returnAlertServices->createReturnAlert(['type' => $data['alerta_devolucion']]);
-
-
-                $lastSale = Sale::where('customer_id', $customer->id)
-                    ->orderBy('date_last_order', 'desc')
-                    ->first();
-
-
-                if ($lastSale && $lastSale->date_last_order >= $data['fecha_ultima_orden']) {
-
-                    $response[] = [
-                        'customer_phone' => $data['telefono'],
-                        'message' => 'No se creó la venta: la fecha es menor o igual a la última venta registrada.',
-                    ];
-                    continue;
-                }
-
-                $this->saleRepository->create([
-                    'customer_id' => $customer->id,
-                    'orders_number' => $data['ordenes'],
-                    'delivered' => $data['entregadas'],
-                    'returns_number' => $data['devoluciones'],
-                    'date_first_order' => $data['fecha_primera_orden'],
-                    'date_last_order' => $data['fecha_ultima_orden'],
-                    "last_order_date_delivered" => $data['fecha_ultima_orden_entregada'],
-                    'total_sales' => $data['ventas'],
-                    'total_revenues' => $data['ingresos'],
-                    'return_value' => $data['valor_devolucion'],
-                    'payment_method_id' => $paymentMethod->id,
-                    'seller_id' => $seller->id,
-                    'shop_id' => $shop->id,
-                    'last_item_purchased' => $data['ultimo_item_comprado'],
-                    'previous_last_item_purchased' => $data['antepenultimo_item_comprado'],
-                    'days_since_last_purchase' => $data['ultimos_dias_compra'],
-                    'return_alert_id' => $returnAlert->id,
-                    'segment_type_id' => $segmentType->id,
-                ]);
-
-
-                $response[] = [
-                    'customer_phone' => $data['telefono'],
-                    'message' => 'Venta registrada con éxito.',
-                ];
-            } catch (\Exception $e) {
-                $response[] = [
-                    'customer_phone' => $data['telefono'],
-                    'message' => 'Error al procesar la venta: ' . $e->getMessage(),
-                ];
-            }
+            $response = $this->processSaleData($data);
+            $responses[] = $response;
         }
 
-        return response()->json($response, 200);
+        return response()->json($responses, 200);
     }
+
+    private function processSaleData(array $data): array
+    {
+        try {
+
+            $department = $this->departmentServices->createDepartment($data['departamento']);
+            $city = $this->cityServices->createCity($data['ciudad'], $department->id);
+            $segmentType = $this->segmentTypeServices->createSegmentType($data['segmentacion']);
+            $shop = $this->shopServices->createShop($data['tienda']);
+            $seller = $this->sellerServices->createSeller($data['vendedor']);
+            $paymentMethod = $this->paymentMethodServices->createPaymentMethod($data['metodo_pago']);
+            $returnAlert = $this->returnAlertServices->createReturnAlert($data['alerta_devolucion']);
+           
+            $customer = $this->customerServices->createCustomer($data, $city->id);
+
+            $lastSale = $this->saleRepository->findLastSaleByCustomer($customer->id);
+
+            if ($lastSale && $lastSale->date_last_order >= $data['fecha_ultima_orden']) {
+                return [
+                    'customer_phone' => $data['telefono'],
+                    'message' => 'No se creó la venta: la fecha es menor o igual a la última venta registrada.',
+                ];
+            }
+
+            $sale = $this->saleRepository->create([
+                'customer_id' => $customer->id,
+                'orders_number' => $data['ordenes'],
+                'delivered' => $data['entregadas'],
+                'returns_number' => $data['devoluciones'],
+                'date_first_order' => $data['fecha_primera_orden'],
+                'date_last_order' => $data['fecha_ultima_orden'],
+                'last_order_date_delivered' => $data['fecha_ultima_orden_entregada'],
+                'total_sales' => $data['ventas'],
+                'total_revenues' => $data['ingresos'],
+                'return_value' => $data['valor_devolucion'],
+                'payment_method_id' => $paymentMethod->id,
+                'seller_id' => $seller->id,
+                'shop_id' => $shop->id,
+                'last_item_purchased' => $data['ultimo_item_comprado'],
+                'previous_last_item_purchased' => $data['antepenultimo_item_comprado'],
+                'days_since_last_purchase' => $data['ultimos_dias_compra'],
+                'return_alert_id' => $returnAlert->id,
+                'segment_type_id' => $segmentType->id,
+            ]);
+
+            return [
+                'customer_phone' => $data['telefono'],
+                'message' => 'Venta registrada con éxito.',
+                'sale_id' => $sale->id, 
+            ];
+
+        } catch (\Exception $e) {
+            Log::error("Error al procesar la venta: " . $e->getMessage() . " Data: " . json_encode($data)); 
+            return [
+                'customer_phone' => $data['telefono'] ?? null, 
+                'message' => 'Error al procesar la venta: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+
 }

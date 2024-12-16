@@ -31,6 +31,7 @@ class SaleController extends Controller
     public function store(StoreSaleRequest $request): JsonResponse
     {
         $data = $request->validated();
+
         
         try {
             DB::transaction(function () use ($data) {

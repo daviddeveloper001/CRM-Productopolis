@@ -12,4 +12,15 @@ class SaleRepository extends BaseRepository
     {
         parent::__construct($sale, self::RELATIONS);
     }
+
+    
+    public function findLastSaleByCustomer(int $customerId)
+    {
+        $lastOrders = Sale::where('customer_id', $customerId)
+        ->orderBy('date_last_order', 'desc')
+        ->first();
+
+
+        return $lastOrders;
+    }
 }

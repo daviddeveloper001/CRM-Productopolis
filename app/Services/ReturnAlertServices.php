@@ -7,9 +7,14 @@ use App\Repositories\ReturnAlertRepository;
 class ReturnAlertServices
 {
     public function __construct(private ReturnAlertRepository $returnAlertRepository){}
-    public function createReturnAlert(array $data)
+    public function createReturnAlert(string $name)
     {
-        $returnAlert = $this->returnAlertRepository->findBy($data);
-        return $returnAlert ?: $this->returnAlertRepository->create($data);
+
+        $searchCriteria = ['type' => $name];
+
+        $returnAlertdData = ['type' => $name];
+
+        $returnAlert = $this->returnAlertRepository->findBy($searchCriteria);
+        return $returnAlert ?: $this->returnAlertRepository->create($returnAlertdData);
     }
 }
