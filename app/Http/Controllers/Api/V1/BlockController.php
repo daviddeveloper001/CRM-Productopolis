@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use Carbon\Carbon;
 use App\Models\Block;
 use App\Enum\EventEnum;
 use App\Models\Customer;
@@ -96,18 +97,44 @@ class BlockController extends Controller
             }
         } */
 
+        // Fecha actual redondeada al minuto
+        $now = Carbon::now()->floorMinute(); // Ejemplo: 2024-12-16 16:23:00
 
-        $blocks = Block::all();
+        // Fecha actual + 2 minutos
+        $upperLimit = $now->copy()->addMinutes(2);
+
+        // Obtener bloques dentro del rango de tiempo actual y +2 minutos
+        $blocks = Block::whereBetween('start_date', [$now, $upperLimit])->get();
+
+        dd('Block consultados' . $blocks);
+
+        if ($blocks->isEmpty()) {
+
+            dd('no hay datos');
+            Log::info('No hay bloques programados para ejecutarse en este momento.');
+            return;
+        }
+
 
         foreach ($blocks as $block) {
+            Log::info("Procesando el bloque ID: {$block->id}");
+
+            // Obtener la acción correspondiente al exit_criterion del bloque
             $action = BlockActionFactory::getAction($block->exit_criterion);
 
             if ($action) {
-                $action->execute($block);
+                try {
+                    $action->execute($block);
+                    Log::info("Acción ejecutada para el bloque: {$block->id}");
+                } catch (\Exception $e) {
+                    Log::error("Error al ejecutar la acción para el bloque {$block->id}: {$e->getMessage()}");
+                }
             } else {
                 Log::warning("No se encontró acción para el criterio: {$block->exit_criterion}");
             }
         }
+
+        Log::info('Procesamiento de bloques completado.');
 
         return response()->json(['message' => 'Procesamiento completado'], 200);
     }
