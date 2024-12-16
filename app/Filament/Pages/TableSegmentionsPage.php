@@ -75,7 +75,7 @@ class TableSegmentionsPage extends Page implements HasTable
                 TextColumn::make('customers.first_name')
                     ->label('Participantes')
                     ->formatStateUsing(function ($state, $record) {
-                        
+
                         return $record->customers->count();
                     }),
 
@@ -167,28 +167,8 @@ class TableSegmentionsPage extends Page implements HasTable
             ->filters([])
             ->actions([
                 Action::make('Reporte')
-                    ->form([
-                        TextInput::make('name')
-                            ->label('Nombre')
-                    ])
-                    ->action(function ($record): void {
-                        $customers = $record->customers;
-                        $cont = 0;
-                        foreach ($customers as $customer) {
-
-
-                            $customerlastSale = Sale::where('customer_id', $customer->id)
-                                ->orderBy('date_last_order', 'desc')
-                                ->first();
-                            foreach ($customer->sales as $sale) {
-                                if ($customerlastSale && $customerlastSale->date_last_order > $sale->date_last_order) {
-                                    $cont++;
-                                    continue;
-                                }
-                            }
-                        }
-                    })
-                    ->slideOver()
+                    ->url(fn($record) => route('filament.pages.report-view', ['record' => $record->id]))
+                    ->openUrlInNewTab() // Opcional: si prefieres abrir en una nueva pestaña.
             ])
             ->bulkActions([
                 BulkAction::make('send_email')

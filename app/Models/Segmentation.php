@@ -32,6 +32,7 @@ class Segmentation extends Model
      */
     protected $casts = [
         'id' => 'integer',
+        'campaign_id' => 'integer',
     ];
 
     public function sales(): HasMany
