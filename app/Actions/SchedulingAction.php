@@ -26,24 +26,20 @@ class SchedulingAction implements BlockActionInterface
             $users = $response->json();
 
             foreach ($users['data'] as $user) {
-                // Validar datos obligatorios
                 if (empty($user['ciudad']) || empty($user['departamento']) || empty($user['telefono']) || empty($user['correo'])) {
                     continue;
                 }
 
-                // Crear o encontrar departamento
                 $department = $this->departmentServices->createDepartment($user['departamento']);
 
-                // Crear o encontrar ciudad
+
                 $city = $this->cityServices->createCity($user['ciudad'], $department->id);
 
-                // Crear cliente
                 $customer = $this->customerServices->createCustomer($user, $city->id);
 
-                // Asociar cliente al bloque
+
                 $customer->blocks()->syncWithoutDetaching([$block->id]);
 
-                // Crear evento relacionado al cliente
                 $this->eventServices->createEvent($user, $customer->id);
             }
 
