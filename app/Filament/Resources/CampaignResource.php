@@ -2,18 +2,19 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CampaignResource\Pages;
-use App\Filament\Resources\CampaignResource\RelationManagers;
+use Filament\Forms;
+use Filament\Tables;
 use App\Models\Block;
+use App\Enum\EventEnum;
 use App\Models\Campaign;
 use App\Models\Template;
-use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\CampaignResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\CampaignResource\RelationManagers;
 
 class CampaignResource extends Resource
 {
@@ -51,7 +52,25 @@ class CampaignResource extends Resource
                     ->multiple()
                     ->preload()
                     ->options(Block::all()->pluck('name', 'id'))
-                    ->required(),
+                    ->required()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nombre')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\Select::make('template_id')
+                            ->label('Plantilla')
+                            //->relationship('template', 'name')
+                            ->required(),
+                        Forms\Components\DateTimePicker::make('start_date')
+                            ->label('Fecha de inicio')
+                            ->required(),
+
+                        Forms\Components\Select::make('exit_criterion')
+                            ->label('Criterio de salida')
+                            ->enum(EventEnum::class)
+                            ->options(EventEnum::class),
+                    ]),
             ]);
     }
 

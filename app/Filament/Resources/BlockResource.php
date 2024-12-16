@@ -28,7 +28,7 @@ class BlockResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
+        /* return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->label('Nombre')
@@ -48,7 +48,11 @@ class BlockResource extends Resource
                 ->options(EventEnum::class),
 
 
-            ]);
+            ]); */
+
+
+            return $form
+            ->schema(Block::getForm());
     }
 
     public static function table(Table $table): Table
