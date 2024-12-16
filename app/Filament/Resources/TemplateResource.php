@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enum\EventEnum;
 use App\Filament\Resources\CityResource\Pages;
 use App\Models\Customer;
 use App\Models\Sale;
@@ -10,6 +11,7 @@ use App\Utils\FormatUtils;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -60,7 +62,6 @@ class TemplateResource extends Resource
                         '2xl' => 12,
                     ])
                     ->live(),
-
                 Group::make()
                     ->schema([
                         Section::make('Contenido')
@@ -89,7 +90,19 @@ class TemplateResource extends Resource
                                         Placeholder::make('3')
                                             ->label('[EMAIL-CLIENTE]'),
                                         Placeholder::make('3')
-                                            ->label('[CIUDAD-CLIENTE]')
+                                            ->label('[CIUDAD-CLIENTE]'),
+                                        Placeholder::make('3')
+                                            ->label('[EVENT-START-DATE]'),
+                                        Placeholder::make('3')
+                                            ->label('[EVENT-START-TIME]'),
+                                        Placeholder::make('3')
+                                            ->label('[EVENT-END-DATE]'),
+                                        Placeholder::make('3')
+                                            ->label('[EVENT-END-TIME]'),
+                                        Placeholder::make('3')
+                                            ->label('[EVENT-TITLE]'),
+                                        Placeholder::make('3')
+                                            ->label('[EVENT-DESCRIPTION]')
                                     ])
                                     ->columns(3),
                                 Textarea::make('content')
@@ -126,7 +139,7 @@ class TemplateResource extends Resource
                                     ->label('Previsualizar con')
                                     ->options(function () {
                                         return Customer::all()->mapWithKeys(function ($customer) {
-                                            return [$customer->id => $customer->customer_name];
+                                            return [$customer->id => $customer->first_name . ' ' . $customer->last_name];
                                         });
                                     })
                                     ->columnSpan([
@@ -166,6 +179,55 @@ class TemplateResource extends Resource
                             ]),
                     ])
                     ->visible(fn($get) => !empty($get('type')))
+                    ->columnSpan([
+                        'sm' => 12,
+                        'xl' => 12,
+                        '2xl' => 12,
+                    ]),
+                Select::make('whatsapp_list')
+                    ->label('Listado de opciones')
+                    ->relationship('whatsappList', 'title')
+                    ->visible(fn($get) => $get('type') === 'whatsapp')
+                    ->preload()
+                    ->createOptionForm([
+                        Grid::make()
+                            ->schema([
+                                Section::make()
+                                    ->schema([
+                                        TextInput::make('title')
+                                            ->required()
+                                            ->maxLength(400),
+                                        Textarea::make('description')
+                                            ->maxLength(65535),
+                                        TextInput::make('button_text')
+                                            ->maxLength(255),
+                                        TextInput::make('footer_text')
+                                            ->maxLength(255),
+                                    ])
+                                    ->columnSpan(12),
+                                Section::make()
+                                    ->schema([
+                                        Repeater::make('sections')
+                                            ->relationship('sections')
+                                            ->schema([
+                                                TextInput::make('title')
+                                                    ->required()
+                                                    ->maxLength(255),
+                                                Repeater::make('options')
+                                                    ->relationship('options')
+                                                    ->schema([
+                                                        TextInput::make('title')
+                                                            ->required()
+                                                            ->maxLength(255),
+                                                        Textarea::make('description')
+                                                            ->maxLength(65535),
+                                                    ]),
+                                            ]),
+                                    ])
+                                    ->columnSpan(12),
+                            ])
+                            ->columns(12),
+                    ])
                     ->columnSpan([
                         'sm' => 12,
                         'xl' => 12,

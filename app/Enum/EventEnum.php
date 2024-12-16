@@ -9,6 +9,11 @@ enum EventEnum: string
     case Presupuesto = 'Presupuesto';
     case Compra = 'Compra';
 
+    public static function fromName(string $name)
+    {
+        return constant("self::$name");
+    }
+
     public function getLabel(): string
     {
         return match ($this) {
@@ -19,4 +24,33 @@ enum EventEnum: string
         };
     }
 
+    public function getWildcards(): array
+    {
+        return match ($this) {
+            self::Agendamiento => [
+                '[NOMBRE-CLIENTE]',
+                '[TELEFONO-CLIENTE]',
+                '[EMAIL-CLIENTE]',
+                '[CIUDAD-CLIENTE]',
+                '[EVENT-START-DATE]',
+                '[EVENT-START-TIME]',
+                '[EVENT-END-DATE]',
+                '[EVENT-END-TIME]',
+                '[EVENT-TITLE]',
+                '[EVENT-DESCRIPTION]'
+            ],
+            self::Demostracion => [
+                '[NOMBRE-CLIENTE]',
+                '[TELEFONO-CLIENTE]',
+                '[EMAIL-CLIENTE]',
+                '[CIUDAD-CLIENTE]',
+                '[EVENT-START-DATE]',
+                '[EVENT-START-TIME]',
+                '[EVENT-END-DATE]',
+                '[EVENT-END-TIME]',
+                '[EVENT-TITLE]',
+                '[EVENT-DESCRIPTION]'
+            ]
+        };
+    }
 }
