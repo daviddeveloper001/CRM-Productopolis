@@ -33,7 +33,7 @@ class FormatUtils
         }
 
         $placeholders = [
-            '[NOMBRE-CLIENTE]' => $customer->customer_name,
+            '[NOMBRE-CLIENTE]' => $customer->first_name . ' ' . $customer->last_name,
             '[TELEFONO-CLIENTE]' => $customer->phone,
             '[EMAIL-CLIENTE]' => $customer->email,
             '[CIUDAD-CLIENTE]' => $customer->city->name
