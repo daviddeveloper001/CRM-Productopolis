@@ -36,10 +36,6 @@ class CampaignResource extends Resource
                     ->label('Campaña')
                     ->required()
                     ->maxLength(400),
-                Forms\Components\Select::make('segment_id')
-                    ->label('Segmento')
-                    ->relationship('segment', 'name')
-                    ->required(),
                 Forms\Components\DatePicker::make('start_date')
                     ->label('Fecha de inicio')
                     ->required(),
@@ -81,10 +77,6 @@ class CampaignResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Campaña')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('segment.name')
-                    ->label('Segmento')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Fecha de inicio')
                     ->numeric()

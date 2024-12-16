@@ -57,7 +57,7 @@ class GenerateSegmentFormPage extends Page
         // Ejecutar la consulta
         //$query = Sale::with(['customer', 'paymentMethod', 'shop', 'seller', 'returnAlert']);
 
-        $query = Customer::with(['sales', 'sales.paymentMethod', 'sales.shop', 'sales.seller', 'sales.returnAlert', 'sales.segment_type']);
+        $query = Customer::with(['sales', 'sales.paymentMethod', 'sales.shop', 'sales.seller', 'sales.returnAlert', 'sales.segmentType']);
 
 
 
@@ -98,6 +98,15 @@ class GenerateSegmentFormPage extends Page
         if (!is_null($limit)) {
             $query->limit($limit);
         } */
+
+
+        $limit = $this->formData['limit'] ?? null;
+
+        //dd($limit);
+
+        if (!is_null($limit)) {
+            $query->limit($limit);
+        }
 
 
 
@@ -412,7 +421,7 @@ class GenerateSegmentFormPage extends Page
 
         // Obtener los clientes específicos de la segmentación seleccionada
         $query = Sale::where('segment_type_id', $segmentTypeId)
-            ->with('customer.sales.segment_type_id') // Cargar la relación con clientes
+            ->with('customer.sales.segmentType') // Cargar la relación con clientes
             ->get()
             ->pluck('customer');
 
@@ -444,13 +453,22 @@ class GenerateSegmentFormPage extends Page
                                     $set('is_unique', !$exists);
                                 }
                             } catch (\Exception $e) {
-                                // Maneja errores silenciosamente o muestra un mensaje personalizado
                                 $set('is_unique', false);
                             }
                         })
                         ->helperText(fn($get) => $get('is_unique') === false
                             ? 'Este nombre ya está registrado. Por favor, elija otro.'
                             : '')
+                        ->columnSpan([
+                            'sm' => 2,
+                            'xl' => 3,
+                            '2xl' => 4,
+                        ]),
+                    Select::make('campaign_id')
+                        ->label('Campaña')
+                        //->searchable()
+                        ->preload()
+                        ->options(Campaign::all()->pluck('name', 'id'))
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,

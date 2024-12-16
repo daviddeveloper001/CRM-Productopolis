@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Campaign;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Segmentation extends Model
@@ -50,8 +51,8 @@ class Segmentation extends Model
         return $this->hasMany(SegmentRegister::class);
     }
 
-    public function campaign() : HasMany
+    public function campaign(): BelongsTo
     {
-        return $this->hasMany(Campaign::class);
+        return $this->belongsTo(Campaign::class); // 'campaign_id' es la FK predeterminada
     }
 }

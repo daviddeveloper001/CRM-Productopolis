@@ -72,9 +72,10 @@ class TableSegmentionsPage extends Page implements HasTable
                     ->since()
                     ->dateTimeTooltip(),
 
-                TextColumn::make('customers.customer_name')
+                TextColumn::make('customers.first_name')
                     ->label('Participantes')
                     ->formatStateUsing(function ($state, $record) {
+                        
                         return $record->customers->count();
                     }),
 

@@ -11,17 +11,16 @@ use Illuminate\Support\Facades\Log;
 
 class ProcessBlocksCommand extends Command
 {
-    protected $signature = 'blocks:process'; // Nombre del comando
+    protected $signature = 'blocks:process'; 
     protected $description = 'Procesa los bloques cuya fecha start_date coincide con el tiempo actual';
 
     public function handle()
     {
-        $now = Carbon::now()->floorMinute(); // Ejemplo: 2024-12-16 16:23:00
+        $now = Carbon::now()->floorMinute(); 
 
-        // Fecha actual + 2 minutos
+
         $upperLimit = $now->copy()->addMinutes(2);
 
-        // Obtener bloques dentro del rango de tiempo actual y +2 minutos
         $blocks = Block::whereBetween('start_date', [$now, $upperLimit])->get();
 
     
