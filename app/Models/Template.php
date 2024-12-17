@@ -21,6 +21,7 @@ class Template extends Model
         'type',
         'content',
         'whatsapp_list_id',
+        'attachment'
     ];
 
 

@@ -2,27 +2,28 @@
 
 namespace App\Filament\Resources;
 
-use App\Enum\EventEnum;
-use App\Filament\Resources\CityResource\Pages;
-use App\Models\Customer;
 use App\Models\Sale;
+use Filament\Tables;
+use App\Enum\EventEnum;
+use App\Models\Customer;
 use App\Models\Template;
+use Filament\Forms\Form;
 use App\Utils\FormatUtils;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Support\HtmlString;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Placeholder;
+use App\Filament\Resources\CityResource\Pages;
 
 class TemplateResource extends Resource
 {
@@ -123,6 +124,13 @@ class TemplateResource extends Resource
                                     ])
                                     ->visible(fn($get) => $get('type') === 'email')
                                     ->live(),
+                                    FileUpload::make('attachment')
+                                    ->label('Archivos')
+                                    ->columnSpan([
+                                        'sm' => 12,
+                                        'xl' => 12,
+                                        '2xl' => 12,
+                                    ])
                             ])
                             ->columnSpan([
                                 'sm' => 12,
