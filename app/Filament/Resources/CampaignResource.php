@@ -15,6 +15,11 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\CampaignResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CampaignResource\RelationManagers;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 
 class CampaignResource extends Resource
 {
@@ -32,41 +37,40 @@ class CampaignResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->label('Campaña')
                     ->required()
-                    ->maxLength(400),
-                Forms\Components\DatePicker::make('start_date')
+                    ->maxLength(400)
+                    ->columnSpan(12),
+                DatePicker::make('start_date')
                     ->label('Fecha de inicio')
-                    ->required(),
-                Forms\Components\DatePicker::make('end_date')
-                    ->label('Fecha de finalización')
-                    ->required(),
-                Forms\Components\Select::make('block_id')
-                    ->label('Bloques')
-                    ->searchable()
-                    ->multiple()
-                    ->preload()
-                    ->options(Block::all()->pluck('name', 'id'))
                     ->required()
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('name')
+                    ->columnSpan(6),
+                DatePicker::make('end_date')
+                    ->label('Fecha de finalización')
+                    ->required()
+                    ->columnSpan(6),
+                Repeater::make('blocks')
+                    ->relationship('blocks')
+                    ->label('Bloques')
+                    ->schema([
+                        TextInput::make('name')
                             ->label('Nombre')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\Select::make('template_id')
+                        Select::make('template_id')
                             ->label('Plantilla')
-                            //->relationship('template', 'name')
+                            ->relationship('template', 'name')
                             ->required(),
-                        Forms\Components\DateTimePicker::make('start_date')
+                        DateTimePicker::make('start_date')
                             ->label('Fecha de inicio')
                             ->required(),
-
-                        Forms\Components\Select::make('exit_criterion')
+                        Select::make('exit_criterion')
                             ->label('Criterio de salida')
                             ->enum(EventEnum::class)
                             ->options(EventEnum::class),
-                    ]),
+                    ])
+                    ->columnSpan(12),
             ]);
     }
 
