@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Actions;
 
+use App\Helpers\EvolutionAPI;
 use App\Models\Block;
 use App\Services\CityServices;
 use App\Services\EventService;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Services\DepartmentServices;
 use Illuminate\Support\Facades\Http;
 use App\Interfaces\BlockActionInterface;
+use App\Utils\FormatUtils;
 
 class DemonstrationAction implements BlockActionInterface
 {
@@ -26,6 +29,7 @@ class DemonstrationAction implements BlockActionInterface
         if ($response->successful()) {
             $users = $response->json();
 
+
             foreach ($users['data'] as $user) {
                 if (empty($user['ciudad']) || empty($user['departamento']) || empty($user['telefono']) || empty($user['correo'])) {
                     continue;
@@ -35,7 +39,22 @@ class DemonstrationAction implements BlockActionInterface
                 $city = $this->cityServices->createCity($user['ciudad'], $department->id);
                 $customer = $this->customerServices->createCustomer($user, $city->id);
                 $customer->blocks()->syncWithoutDetaching([$block->id]);
-                $this->eventServices->createEvent($user, $customer->id);
+                $event = $this->eventServices->createEvent($user, $customer->id);
+
+                if ($block->template->type === 'whatsapp') {
+                    $dataToSend = [
+                        'phone' => $customer->phone,
+                        'message' => FormatUtils::replaceSchedulingPlaceholders(
+                            $block->template->content,
+                            $customer->id,
+                            $event->id
+                        ),
+                        'filename' => "",
+                        'attachment_url' => "",
+                    ];
+
+                    EvolutionAPI::send_from_data($dataToSend);
+                }
             }
 
             Log::info("Procesamiento de demostración completado para el bloque {$block->id}");

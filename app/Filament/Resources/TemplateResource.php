@@ -94,11 +94,7 @@ class TemplateResource extends Resource
                                         Placeholder::make('3')
                                             ->label('[EVENT-START-DATE]'),
                                         Placeholder::make('3')
-                                            ->label('[EVENT-START-TIME]'),
-                                        Placeholder::make('3')
                                             ->label('[EVENT-END-DATE]'),
-                                        Placeholder::make('3')
-                                            ->label('[EVENT-END-TIME]'),
                                         Placeholder::make('3')
                                             ->label('[EVENT-TITLE]'),
                                         Placeholder::make('3')
@@ -184,7 +180,7 @@ class TemplateResource extends Resource
                         'xl' => 12,
                         '2xl' => 12,
                     ]),
-                Select::make('whatsapp_list')
+                Select::make('whatsapp_list_id')
                     ->label('Listado de opciones')
                     ->relationship('whatsappList', 'title')
                     ->visible(fn($get) => $get('type') === 'whatsapp')

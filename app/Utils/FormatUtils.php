@@ -2,7 +2,9 @@
 
 namespace App\Utils;
 
+use App\Enum\EventEnum;
 use App\Models\Customer;
+use App\Models\Event;
 use App\Models\Sale;
 
 
@@ -44,5 +46,24 @@ class FormatUtils
         }
 
         return $content;
+    }
+
+    static function replaceSchedulingPlaceholders($content, $customer_id, $event_id)
+    {
+        $customerContent = self::replaceCustomerPlaceholders($content, $customer_id);
+        $scheduling = Event::find($event_id);
+
+        $placeholders = [
+            '[EVENT-START-DATE]' => $scheduling->event_start,
+            '[EVENT-END-DATE]' => $scheduling->event_end,
+            '[EVENT-TITLE]' => $scheduling->event_title,
+            '[EVENT-DESCRIPTION]' => $scheduling->event_description
+        ];
+
+        foreach ($placeholders as $placeholder => $value) {
+            $customerContent = str_replace($placeholder, $value, $customerContent);
+        }
+
+        return $customerContent;
     }
 }
