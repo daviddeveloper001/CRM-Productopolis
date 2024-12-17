@@ -13,4 +13,9 @@ class Campaign extends Model
     {
         return $this->hasMany(Segmentation::class);
     }
+
+    public function blocks()
+    {
+        return $this->belongsToMany(Block::class, BlockCampaign::class, 'campaign_id', 'block_id');
+    }
 }
