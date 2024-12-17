@@ -20,6 +20,7 @@ class Template extends Model
         'name',
         'type',
         'content',
+        'whatsapp_list_id',
     ];
 
 

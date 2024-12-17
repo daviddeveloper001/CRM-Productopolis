@@ -2,7 +2,10 @@
 
 namespace App\Helpers;
 
+use App\Models\Config;
+use App\Models\Template;
 use App\Utils\FileUtils;
+use App\Utils\FormatUtils;
 
 class EvolutionAPI
 {
@@ -193,5 +196,17 @@ class EvolutionAPI
                 $instance
             );
         }
+    }
+
+    static function send_from_data($dataToSend)
+    {
+        EvolutionAPI::whatsapp_send_message_EA(
+            $dataToSend['filename'],
+            /*$dataToSend['attachment_url'],*/
+            "https://olondriz.com/wp-content/uploads/2020/04/ambar-perrito-1.jpg",
+            $dataToSend['phone'],
+            $dataToSend['message'],
+            'SALES'
+        );
     }
 }

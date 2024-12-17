@@ -2,8 +2,7 @@
 
 namespace App\Actions;
 
-
-
+use App\Helpers\EvolutionAPI;
 use App\Models\Block;
 use App\Services\CityServices;
 use App\Services\EventService;
@@ -12,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Services\DepartmentServices;
 use Illuminate\Support\Facades\Http;
 use App\Interfaces\BlockActionInterface;
-
+use App\Utils\FormatUtils;
 
 class SchedulingAction implements BlockActionInterface
 {
@@ -40,7 +39,22 @@ class SchedulingAction implements BlockActionInterface
 
                 $customer->blocks()->syncWithoutDetaching([$block->id]);
 
-                $this->eventServices->createEvent($user, $customer->id);
+                $event = $this->eventServices->createEvent($user, $customer->id);
+
+                if ($block->template->type === 'whatsapp') {
+                    $dataToSend = [
+                        'phone' => $customer->phone,
+                        'message' => FormatUtils::replaceSchedulingPlaceholders(
+                            $block->template->content,
+                            $customer->id,
+                            $event->id
+                        ),
+                        'filename' => "",
+                        'attachment_url' => "",
+                    ];
+
+                    EvolutionAPI::send_from_data($dataToSend);
+                }
             }
 
             Log::info("Procesamiento de Agendamiento completado para el bloque {$block->id}");
