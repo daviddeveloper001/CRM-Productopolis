@@ -43,7 +43,7 @@ class ReportViewPage extends Page implements HasTable
                 ->orderBy('date_last_order', 'desc')
                 ->first();
                 
-                dd($lastSale);
+                //dd($lastSale);
             // Si no hay ventas relacionadas, continuar con el siguiente cliente
             if (!$lastSale) {
                 continue;
