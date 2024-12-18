@@ -16,10 +16,18 @@ use App\Utils\FormatUtils;
 class SchedulingAction implements BlockActionInterface
 {
     public function __construct(private CityServices $cityServices, private DepartmentServices $departmentServices, private CustomerServices $customerServices, private EventService $eventServices) {}
-    public function execute(Block $block): void
+    public function execute(Block $block, array $filters): void
     {
+        dd($filters);
+        $country = $filters['country'] ?? null;
+        $typeUser = $filters['type_user'] ?? null;
 
-        $response = Http::get('https://app.monaros.co/sistema/index.php/public_routes/get_clients_by_scheduling');
+        $response = Http::get('https://app.monaros.co/sistema/index.php/public_routes/get_clients_by_scheduling', [
+            'country' => $country,
+            'type_user' => $typeUser,
+        ]);
+
+        dd($response);
 
         if ($response->successful()) {
             $users = $response->json();

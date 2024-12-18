@@ -5,5 +5,6 @@ use App\Models\Block;
 
 interface BlockActionInterface
 {
-    public function execute(Block $block): void;
+    public function execute(Block $block, array $filters): void;
 }
+

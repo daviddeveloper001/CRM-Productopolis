@@ -4,7 +4,7 @@ namespace App\Enum;
 
 enum TypeSegmentEnum: string
 {
-    case ProductPolis = 'ProductPolis';
+    case ProductoPolis = 'ProductoPolis';
     case Medical = 'Medical';
 
 }

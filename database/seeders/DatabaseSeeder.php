@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             PaymentMethodSeeder::class,
             ReturnAlertSeeder::class,
             UserSeeder::class,
+            CountrySeeder::class,
         ]);
     }
 }

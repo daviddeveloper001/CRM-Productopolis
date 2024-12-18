@@ -18,7 +18,6 @@ class ProcessBlocksCommand extends Command
     {
         $now = Carbon::now()->floorMinute(); 
 
-
         $upperLimit = $now->copy()->addMinutes(2);
 
         $blocks = Block::whereBetween('start_date', [$now, $upperLimit])->get();
@@ -35,7 +34,10 @@ class ProcessBlocksCommand extends Command
     
             if ($action) {
                 try {
-                    $action->execute($block);
+                    $action->execute($block, [
+                        'country' => $block->campaign->filters['country'],
+                        'type_user' => $block->campaing->filters['user_type'],
+                    ]);
                     Log::info("Acción ejecutada para el bloque: {$block->id}");
                 } catch (\Exception $e) {
                     Log::error("Error al ejecutar la acción para el bloque {$block->id}: {$e->getMessage()}");

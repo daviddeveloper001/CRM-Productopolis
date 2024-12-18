@@ -7,15 +7,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Campaign extends Model
 {
-    protected $fillable = ['name', 'start_date', 'end_date'];
+    protected $fillable = ['name', 'start_date', 'end_date', 'filters'];
+
+    protected $casts = [
+        'filters' => 'array',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+    ];
 
     public function segments(): HasMany
     {
         return $this->hasMany(Segmentation::class);
     }
 
-    public function blocks()
+    public function blocks() : HasMany
     {
-        return $this->belongsToMany(Block::class, BlockCampaign::class, 'campaign_id', 'block_id');
+        return $this->hasMany(Block::class);
     }
 }

@@ -104,9 +104,9 @@ class BlockController extends Controller
         $upperLimit = $now->copy()->addMinutes(2);
 
         // Obtener bloques dentro del rango de tiempo actual y +2 minutos
-        $blocks = Block::whereBetween('start_date', [$now, $upperLimit])->get();
+        $blocks = Block::all() /* Block::whereBetween('start_date', [$now, $upperLimit])->get() */;
 
-        dd('Block consultados' . $blocks);
+
 
         if ($blocks->isEmpty()) {
 
@@ -124,7 +124,10 @@ class BlockController extends Controller
 
             if ($action) {
                 try {
-                    $action->execute($block);
+                    $action->execute($block, [
+                        'country' => $block->campaign->filters['country'],
+                        'type_user' => $block->campaing->filters['user_type'],
+                    ]);
                     Log::info("Acción ejecutada para el bloque: {$block->id}");
                 } catch (\Exception $e) {
                     Log::error("Error al ejecutar la acción para el bloque {$block->id}: {$e->getMessage()}");

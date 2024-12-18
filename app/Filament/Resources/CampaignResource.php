@@ -9,10 +9,12 @@ use Filament\Tables;
 use App\Models\Block;
 use App\Models\Seller;
 use App\Enum\EventEnum;
+use App\Models\Country;
 use Filament\Forms\Get;
 use App\Models\Campaign;
 use App\Models\Template;
 use Filament\Forms\Form;
+use App\Enum\UserTypeEnum;
 use App\Models\Department;
 use Filament\Tables\Table;
 use App\Models\ReturnAlert;
@@ -32,7 +34,6 @@ use Filament\Forms\Components\DateTimePicker;
 use App\Filament\Resources\CampaignResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CampaignResource\RelationManagers;
-
 
 class CampaignResource extends Resource
 {
@@ -87,7 +88,7 @@ class CampaignResource extends Resource
 
                 Section::make('Filtros de segmentación')
                     ->collapsible()
-                    ->description('Agregar filtros a la segmentación')
+                    ->description('Agregar filtros a la segmentación para productopolis')
                     ->schema([
                         Section::make('Información del segmento')
                             ->columns([
@@ -179,7 +180,44 @@ class CampaignResource extends Resource
                                     ]),
                             ]),
                     ])
-                    ->visible(fn($get) => $get('type_segment') === 'ProductPolis'),
+                    ->visible(fn($get) => $get('type_segment') === 'ProductoPolis'),
+
+                Section::make('Filtros de segmentación')
+                    ->collapsible()
+                    ->description('Agregar filtros a la segmentación para Medical')
+                    ->schema([
+                        Section::make('Información del segmento')
+                            ->columns([
+                                'sm' => 3,
+                                'xl' => 4,
+                                '2xl' => 8,
+                            ])
+                            ->schema([
+                                Select::make('filters.country')
+                                    ->label('País')
+                                    ->options(Country::all()->pluck('name', 'name'))
+                                    ->preload()
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+
+                                Select::make('filters.user_type')
+                                    ->label('Tipo de Usuario')
+                                    ->Enum(UserTypeEnum::class)
+                                    ->options(UserTypeEnum::class)
+                                    ->preload()
+                                    
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+                                
+                            ]),
+                    ])
+                    ->visible(fn($get) => $get('type_segment') === 'Medical'),
 
                 Section::make('Bloques')
                     ->collapsible()
@@ -192,7 +230,7 @@ class CampaignResource extends Resource
                             ->schema(Block::getForm())
                             ->columnSpan(12),
                     ])
-                    ->visible(fn($get) => $get('type_segment') === 'Medical')
+                    ->visible(fn($get) => $get('type_segment') === 'Medical'),
 
             ]);
     }

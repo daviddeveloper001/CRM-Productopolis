@@ -433,31 +433,6 @@ class GenerateSegmentFormPage extends Page
 
     }
 
-    protected function getCustomersByDateFirstOrder()
-    {
-        $startDate = $this->formData["start_date"] ?? null;
-
-        dd($startDate);
-        $endDate = $this->formData["end_date"] ?? null;
-
-        if (is_null($startDate) || is_null($endDate)) {
-            return [
-                'query' => collect(),
-                'sales' => collect(),
-            ];
-        }
-
-        $sales = Sale::whereBetween('created_at', [$startDate, $endDate])
-            ->with('customer.sales.segmentType') // Cargar la relación con clientes
-            ->get();
-
-        return [
-            'query' => $sales,
-            'sales' => $sales,
-        ];
-    }
-
-
     protected function getFormSchema(): array
     {
         return [
