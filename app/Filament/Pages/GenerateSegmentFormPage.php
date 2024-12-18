@@ -2,34 +2,35 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Campaign;
 use App\Models\City;
 use App\Models\Sale;
 use App\Models\Shop;
 use App\Models\Seller;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use App\Models\Campaign;
 use App\Models\Customer;
 use Filament\Pages\Page;
 use App\Models\Department;
+use App\Utils\FormatUtils;
 use App\Models\ReturnAlert;
+use App\Models\SegmentType;
 use App\Models\Segmentation;
 use Filament\Actions\Action;
 use App\Models\PaymentMethod;
 use App\Models\SegmentRegister;
 use Faker\Provider\ar_EG\Payment;
 use App\Models\SegmentionRegister;
-use App\Models\SegmentType;
-use App\Utils\FormatUtils;
-use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\HtmlString;
 use Illuminate\Contracts\View\View;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\HtmlString;
 
 class GenerateSegmentFormPage extends Page
 {
@@ -92,23 +93,10 @@ class GenerateSegmentFormPage extends Page
         if (!is_null($daysFromPurchase) && !is_null($upDaysFromPurchase)) {
             $query->whereBetween('created_at', [now()->subDays($upDaysFromPurchase), now()->subDays($daysFromPurchase)]);
         }
-
-        $limit = $this->formData['limit'] ?? null;
-
-        if (!is_null($limit)) {
-            $query->limit($limit);
-        } */
+*/
 
 
-        $limit = $this->formData['limit'] ?? null;
-
-        //dd($limit);
-
-        if (!is_null($limit)) {
-            $query->limit($limit);
-        }
-
-
+        $this->limitCustomers($query);
 
         // Obtener los datos
         $data = $query->get();
@@ -175,6 +163,10 @@ class GenerateSegmentFormPage extends Page
                     'customersBySegmentType' => [
                         'query' => $this->getCustomersBySegmentType()['query'],
                         'segmentTypes' => $this->getCustomersBySegmentType()['segmentTypes']
+                    ],
+                    'customersByDateFirtsSale' => [
+                        'query' => $this->getCustomersByDateFirtsSale()['query'],
+                        'customers' => $this->getCustomersByDateFirtsSale()['customers']
                     ]
                 ]
             ))
@@ -401,8 +393,6 @@ class GenerateSegmentFormPage extends Page
         ];
     }
 
-
-
     protected function getCustomersBySegmentType()
     {
         $segmentTypeId = $this->formData["segment_type_id"] ?? null;
@@ -428,6 +418,42 @@ class GenerateSegmentFormPage extends Page
         return [
             'query' => $query,
             'segmentTypes' => $segmentTypes,
+        ];
+    }
+
+
+    protected function limitCustomers($query)
+    {
+        $limit = $this->formData['limit'] ?? null;
+
+
+        if (!is_null($limit)) {
+            $query->limit($limit);
+        }
+
+    }
+
+    protected function getCustomersByDateFirstOrder()
+    {
+        $startDate = $this->formData["start_date"] ?? null;
+
+        dd($startDate);
+        $endDate = $this->formData["end_date"] ?? null;
+
+        if (is_null($startDate) || is_null($endDate)) {
+            return [
+                'query' => collect(),
+                'sales' => collect(),
+            ];
+        }
+
+        $sales = Sale::whereBetween('created_at', [$startDate, $endDate])
+            ->with('customer.sales.segmentType') // Cargar la relación con clientes
+            ->get();
+
+        return [
+            'query' => $sales,
+            'sales' => $sales,
         ];
     }
 
@@ -573,6 +599,21 @@ class GenerateSegmentFormPage extends Page
                         //->searchable()
                         ->preload()
                         ->options(Shop::all()->pluck('name', 'id'))
+                        ->columnSpan([
+                            'sm' => 2,
+                            'xl' => 3,
+                            '2xl' => 4,
+                        ]),
+
+                    DatePicker::make('date_first_order')
+                        ->label('Fecha de inicio')
+                        ->columnSpan([
+                            'sm' => 2,
+                            'xl' => 3,
+                            '2xl' => 4,
+                        ]),
+                    DatePicker::make('date_last_order')
+                        ->label('Fecha de finalización')
                         ->columnSpan([
                             'sm' => 2,
                             'xl' => 3,

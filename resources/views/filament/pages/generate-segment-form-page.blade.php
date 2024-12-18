@@ -1,11 +1,13 @@
 <x-filament-panels::page>
     <form wire:submit="submit">
-        {{ $this->form }}
-        
+        <div class="mb-4">
+            {{ $this->form }}
+        </div>
+
         {{ $this->submitAction }}
 
-        <x-filament-actions::modals/>
+        <x-filament-actions::modals />
     </form>
-    
+
 
 </x-filament-panels::page>

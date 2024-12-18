@@ -1,7 +1,11 @@
 <div>
     <div class="mb-4">
         <h3>{{ $getNameForm }}</h3>
-        <div>@error('name_segment') {{ $message }} @enderror</div>
+        <div>
+            @error('name_segment')
+                {{ $message }}
+            @enderror
+        </div>
     </div>
     @if (!$customersByPaymentMethod['query']->isEmpty())
         <h2 class="text-lg font-bold">Clientes por Método de Pago</h2>
