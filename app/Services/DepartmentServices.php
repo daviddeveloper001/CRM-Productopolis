@@ -15,6 +15,10 @@ class DepartmentServices
 
         $departmentData = ['name' => $name];
 
+        if ($departmentData == null) {
+            return $departmentData = 'Not found';
+        }
+
         $department = $this->departmentRepository->findBy($searchCriteria);
         return $department ?: $this->departmentRepository->create($departmentData);
     }   

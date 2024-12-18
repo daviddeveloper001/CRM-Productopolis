@@ -2,20 +2,18 @@
 
 namespace App\Actions;
 
-use App\Helpers\EvolutionAPI;
-use App\Models\Block;
-use App\Services\CityServices;
-use App\Services\EventService;
-use App\Services\CustomerServices;
-use Illuminate\Support\Facades\Log;
-use App\Services\DepartmentServices;
-use Illuminate\Support\Facades\Http;
-use App\Interfaces\BlockActionInterface;
-use App\Utils\FormatUtils;
+use App\Abstracts\AbstractBlockAction;
 
-class DemonstrationAction implements BlockActionInterface
+
+
+class DemonstrationAction implements AbstractBlockAction
 {
-    public function __construct(
+
+    protected function getApiEndpoint(): string
+    {
+        return 'https://app.monaros.co/sistema/index.php/public_routes/get_clients_not_attend_demo';
+    }
+    /* public function __construct(
         private CityServices $cityServices,
         private DepartmentServices $departmentServices,
         private CustomerServices $customerServices,
@@ -61,5 +59,5 @@ class DemonstrationAction implements BlockActionInterface
         } else {
             Log::error("Error al conectar con la API para el bloque {$block->id}: {$response->status()}");
         }
-    }
+    } */
 }

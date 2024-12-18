@@ -22,13 +22,15 @@ class CustomerServices
             $fullName = explode(' ', trim($data['nombre_cliente']));
             $firstName = $fullName[0] ?? null;
             $lastName = implode(' ', array_slice($fullName, 1));
+            
+            $baseEmail = strtolower($firstName . '.' . $lastName) . '@example.com';
 
 
             $customerData = [
                 'first_name' => $firstName,
                 'last_name' => $lastName,
                 'phone' => $data['telefono'],
-                'email' => $data['correo'],
+                'email' => $baseEmail,
                 'is_frequent_customer' => $data['es_comun'] ?? false,
                 'city_id' => $cityId,
             ];
@@ -39,5 +41,6 @@ class CustomerServices
 
         return $customer;
     }
+
 
 }

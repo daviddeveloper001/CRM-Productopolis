@@ -12,6 +12,9 @@ class CityServices
     public function createCity(string $cityName, int $departmentId) : City
     {
 
+        if($cityName == null) {
+            return $cityName = 'Not found';
+        }
         
         $searchCriteria = [
             'name' => $cityName
