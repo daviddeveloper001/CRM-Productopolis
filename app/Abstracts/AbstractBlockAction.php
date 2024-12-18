@@ -15,8 +15,6 @@ use App\Interfaces\BlockActionInterface;
 
 abstract class AbstractBlockAction implements BlockActionInterface
 {
-
-
     public function __construct(protected CityServices $cityServices, protected DepartmentServices $departmentServices, protected CustomerServices $customerServices, protected EventService $eventServices){}
 
 
@@ -25,13 +23,20 @@ abstract class AbstractBlockAction implements BlockActionInterface
 
     public function execute(Block $block, array $filters): void
     {
+
+
         $country = $filters['country'] ?? null;
         $typeUser = $filters['type_user'] ?? null;
-
+        $event = $filters['event'] ?? null;
+        $confirmation = $filters['confirmation'] ? '1' : '0';
+        
         $response = Http::get($this->getApiEndpoint(), [
             'country' => $country,
             'type_user' => $typeUser,
+            'event' => $event,
+            'confirmation' => $confirmation
         ]);
+
 
         if ($response->successful()) {
             $users = $response->json();

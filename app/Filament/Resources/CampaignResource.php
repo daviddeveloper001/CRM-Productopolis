@@ -25,6 +25,7 @@ use App\Models\PaymentMethod;
 use Filament\Resources\Resource;
 use App\Enum\TypeSegmentationEnum;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
@@ -208,13 +209,32 @@ class CampaignResource extends Resource
                                     ->Enum(UserTypeEnum::class)
                                     ->options(UserTypeEnum::class)
                                     ->preload()
-                                    
+
                                     ->columnSpan([
                                         'sm' => 2,
                                         'xl' => 3,
                                         '2xl' => 4,
                                     ]),
-                                
+
+                                Select::make('filters.event')
+                                    ->label('Criterio de entrada')
+                                    ->enum(EventEnum::class)
+                                    ->options(EventEnum::class)
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+
+                                Toggle::make('filters.confirmation')
+                                    ->label('Confirmación')
+                                    ->inline(false)
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+
                             ]),
                     ])
                     ->visible(fn($get) => $get('type_segment') === 'Medical'),

@@ -3,7 +3,7 @@ namespace App\Actions;
 
 use App\Abstracts\AbstractBlockAction;
 
-class BuyAction implements AbstractBlockAction
+class BuyAction extends AbstractBlockAction
 {
     protected function getApiEndpoint(): string
     {

@@ -4,7 +4,7 @@ namespace App\Actions;
 use App\Abstracts\AbstractBlockAction;
 
 
-class BudgetAction implements AbstractBlockAction
+class BudgetAction extends AbstractBlockAction
 {
     protected function getApiEndpoint(): string
     {

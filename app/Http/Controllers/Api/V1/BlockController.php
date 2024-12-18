@@ -24,78 +24,7 @@ class BlockController extends Controller
     /* public function __construct(private CityServices $cityServices, private DepartmentServices $departmentServices, private CustomerServices $customerServices, private EventService $eventServices) {} */
     public function index()
     {
-        /* $blocks = Block::all();
 
-        foreach ($blocks as $key => $value) {
-
-            if ($value->exit_criterion == EventEnum::Agendamiento->getLabel()) 
-            {
-                $response = Http::get('https://app.monaros.co/sistema/index.php/public_routes/get_clients_by_scheduling');
-
-                if ($response->successful()) {
-
-                    $users = $response->json();
-
-                    foreach ($users['data'] as $user) {
-                        
-                        if (empty($user['ciudad']) || empty($user['departamento']) || empty($user['telefono']) || empty($user['correo'])) {
-                            continue;
-                        }
-                    
-                        $department = $this->departmentServices->createDepartment($user['departamento']);
-
-                        $city = $this->cityServices->createCity($user['ciudad'], $department->id);
-                    
-                        $customer = $this->customerServices->createCustomer($user, $city->id);
-
-                        $customer->blocks()->syncWithoutDetaching([$value->id]);
-
-                        $event = $this->eventServices->createEvent($user, $customer->id);
-                    }
-                    
-
-                    return response()->json($users);
-                }
-
-                return response()->json([
-                    'error' => 'No se logró conectar a la API'
-                ], $response->status());
-            }
-
-            if ($value->exit_criterion == EventEnum::Demostracion->getLabel()) 
-            {
-                $response = Http::get('https://app.monaros.co/sistema/index.php/public_routes/get_clients_not_attend_demo');
-
-                if ($response->successful()) {
-
-                    $users = $response->json();
-
-                    foreach ($users['data'] as $user) {
-                        
-                        if (empty($user['ciudad']) || empty($user['departamento']) || empty($user['telefono']) || empty($user['correo'])) {
-                            continue;
-                        }
-                    
-                        $department = $this->departmentServices->createDepartment($user['departamento']);
-
-                        $city = $this->cityServices->createCity($user['ciudad'], $department->id);
-                    
-                        $customer = $this->customerServices->createCustomer($user, $city->id);
-
-                        $customer->blocks()->syncWithoutDetaching([$value->id]);
-
-                        $event = $this->eventServices->createEvent($user, $customer->id);
-                    }
-                    
-
-                    return response()->json($users);
-                }
-
-                return response()->json([
-                    'error' => 'No se logró conectar a la API'
-                ], $response->status());
-            }
-        } */
 
         // Fecha actual redondeada al minuto
         $now = Carbon::now()->floorMinute(); // Ejemplo: 2024-12-16 16:23:00
@@ -107,7 +36,6 @@ class BlockController extends Controller
         $blocks = Block::all() /* Block::whereBetween('start_date', [$now, $upperLimit])->get() */;
 
 
-
         if ($blocks->isEmpty()) {
 
             dd('no hay datos');
@@ -117,25 +45,35 @@ class BlockController extends Controller
 
 
         foreach ($blocks as $block) {
-            Log::info("Procesando el bloque ID: {$block->id}");
-
-            // Obtener la acción correspondiente al exit_criterion del bloque
+            Log::info("Procesando bloque ID: {$block->id}, Criterio: {$block->exit_criterion}");
+        
             $action = BlockActionFactory::getAction($block->exit_criterion);
-
+        
             if ($action) {
                 try {
-                    $action->execute($block, [
+                    Log::info("Acción creada exitosamente: " . get_class($action));
+                    
+                    $filters = [
                         'country' => $block->campaign->filters['country'],
-                        'type_user' => $block->campaing->filters['user_type'],
-                    ]);
+                        'type_user' => $block->campaign->filters['user_type'],
+                        'event' => $block->campaign->filters['event'],
+                        'confirmation' => $block->campaign->filters['confirmation'] ? '1' : '0'
+                    ];
+                    
+                    Log::info("Ejecutando acción con filtros: " . json_encode($filters));
+        
+                    $action->execute($block, $filters);
+        
                     Log::info("Acción ejecutada para el bloque: {$block->id}");
                 } catch (\Exception $e) {
                     Log::error("Error al ejecutar la acción para el bloque {$block->id}: {$e->getMessage()}");
+                    Log::error("Stack trace: " . $e->getTraceAsString());
                 }
             } else {
                 Log::warning("No se encontró acción para el criterio: {$block->exit_criterion}");
             }
         }
+        
 
         Log::info('Procesamiento de bloques completado.');
 

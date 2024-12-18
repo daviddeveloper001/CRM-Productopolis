@@ -6,7 +6,7 @@ use App\Abstracts\AbstractBlockAction;
 
 
 
-class DemonstrationAction implements AbstractBlockAction
+class DemonstrationAction extends AbstractBlockAction
 {
 
     protected function getApiEndpoint(): string

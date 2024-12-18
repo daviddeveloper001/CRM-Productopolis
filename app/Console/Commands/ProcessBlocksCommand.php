@@ -37,6 +37,8 @@ class ProcessBlocksCommand extends Command
                     $action->execute($block, [
                         'country' => $block->campaign->filters['country'],
                         'type_user' => $block->campaing->filters['user_type'],
+                        'event' => $block->campaing->filters['event'],
+                        'confirmation' => $block->campaign->filters['confirmation'] ? '1' : '0'
                     ]);
                     Log::info("Acción ejecutada para el bloque: {$block->id}");
                 } catch (\Exception $e) {
