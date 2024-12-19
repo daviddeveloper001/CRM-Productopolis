@@ -24,6 +24,7 @@ use App\Enum\TypeSegmentEnum;
 use App\Models\PaymentMethod;
 use Filament\Resources\Resource;
 use App\Enum\TypeSegmentationEnum;
+use App\Enum\EventProductoPolisEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Section;
@@ -98,7 +99,7 @@ class CampaignResource extends Resource
                                 '2xl' => 8,
                             ])
                             ->schema([
-                                Select::make('payment_method_id')
+                                Select::make('filters.payment_method_id')
                                     ->label('Método de pago')
                                     ->options(PaymentMethod::all()->pluck('name', 'id'))
                                     //->searchable()
@@ -109,7 +110,7 @@ class CampaignResource extends Resource
                                         '2xl' => 4,
                                     ]),
 
-                                Select::make('alert_id')
+                                Select::make('filters.alert_id')
                                     ->label('Alertas de devolución')
                                     ->options(ReturnAlert::all()->pluck('type', 'id'))
                                     ->preload()
@@ -118,7 +119,7 @@ class CampaignResource extends Resource
                                         'xl' => 3,
                                         '2xl' => 4,
                                     ]),
-                                Select::make('department_id')
+                                Select::make('filters.department_id')
                                     ->label('Departamento')
                                     //->searchable()
                                     ->preload()
@@ -129,7 +130,7 @@ class CampaignResource extends Resource
                                         '2xl' => 4,
                                     ]),
 
-                                Select::make('city_id')
+                                Select::make('filters.city_id')
                                     ->label('Ciudad')
                                     //->searchable()
                                     ->preload()
@@ -140,14 +141,14 @@ class CampaignResource extends Resource
                                         '2xl' => 4,
                                     ]),
 
-                                TextInput::make('limit')
+                                TextInput::make('filters.limit')
                                     ->label('Limite')
                                     ->columnSpan([
                                         'sm' => 2,
                                         'xl' => 3,
                                         '2xl' => 4,
                                     ]),
-                                Select::make('segment_type_id')
+                                Select::make('filters.segment_type_id')
                                     ->label('Tipo de Segmento')
                                     //->searchable()
                                     ->preload()
@@ -158,7 +159,7 @@ class CampaignResource extends Resource
                                         '2xl' => 4,
                                     ]),
 
-                                Select::make('seller_id')
+                                Select::make('filters.seller_id')
                                     ->label('Vendedor')
                                     //->searchable()
                                     ->preload()
@@ -169,7 +170,7 @@ class CampaignResource extends Resource
                                         '2xl' => 4,
                                     ]),
 
-                                Select::make('shop_id')
+                                Select::make('filters.shop_id')
                                     ->label('Tienda')
                                     //->searchable()
                                     ->preload()
@@ -179,7 +180,34 @@ class CampaignResource extends Resource
                                         'xl' => 3,
                                         '2xl' => 4,
                                     ]),
+                                DatePicker::make('filters.date_first_order')
+                                    ->label('Fecha de inicio')
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+                                DatePicker::make('filters.date_last_order')
+                                    ->label('Fecha de finalización')
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+
                             ]),
+                    ])
+                    ->visible(fn($get) => $get('type_segment') === 'ProductoPolis'),
+                Section::make('Bloques')
+                    ->collapsible()
+                    ->description('Agregar bloques a la campaña')
+                    ->schema([
+                        Repeater::make('blocks')
+                            ->collapsible()
+                            ->relationship('blocks')
+                            ->label('Bloques')
+                            ->schema(Block::getForm())
+                            ->columnSpan(12),
                     ])
                     ->visible(fn($get) => $get('type_segment') === 'ProductoPolis'),
 
@@ -229,6 +257,40 @@ class CampaignResource extends Resource
                                 Toggle::make('filters.confirmation')
                                     ->label('Confirmación')
                                     ->inline(false)
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+
+                                Select::make('filters.event2')
+                                    ->label('Criterio de entrada')
+                                    ->enum(EventEnum::class)
+                                    ->options(EventEnum::class)
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+
+                                Toggle::make('filters.confirmation2')
+                                    ->label('Confirmación')
+                                    ->inline(false)
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+
+                                DatePicker::make('filters.event_start_date')
+                                    ->label('Fecha de inicio de evento')
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+                                DatePicker::make('filters.event_end_date')
+                                    ->label('Fecha de finalización de evento')
                                     ->columnSpan([
                                         'sm' => 2,
                                         'xl' => 3,

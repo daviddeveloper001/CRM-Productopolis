@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum EventEntryEnum: string
+enum EventProductoPolisEnum: string
 {
     case Venta = 'Venta';
 
