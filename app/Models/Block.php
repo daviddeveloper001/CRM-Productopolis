@@ -7,6 +7,7 @@ use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -33,10 +34,28 @@ class Block extends Model
 
 
 
-    public function campaign() : BelongsTo
+    public function campaign(): BelongsTo
     {
         return $this->belongsTo(Campaign::class);
     }
+
+
+    public function segment(): HasOne
+    {
+        return $this->hasOne(Segmentation::class);
+    }
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($block) {
+            if (!$block->exit_criterion && $block->campaign) {
+                $block->exit_criterion = $block->campaign->filters['exit_criterion'] ?? null;
+            }
+        });
+    }
+
 
 
     public static function getForm(): array
@@ -57,7 +76,9 @@ class Block extends Model
             Select::make('exit_criterion')
                 ->label('Criterio de salida')
                 ->enum(EventEnum::class)
-                ->options(EventEnum::class),
+                ->options(EventEnum::class)
+                ->hidden()
+                ->default($data['exit_criterion'] ?? null)
         ];
     }
 }

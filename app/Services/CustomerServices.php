@@ -10,7 +10,7 @@ use App\Repositories\CustomerRepository;
 class CustomerServices
 {
     public function __construct(private CustomerRepository $customerRepository) {}
-    public function createCustomer(array $data, int $cityId): Customer
+    public function createCustomer(array $data, int $cityId, int $countryId): Customer
     {
         $searchCriteria = [
             'phone' => $data['telefono']
@@ -25,7 +25,6 @@ class CustomerServices
             
             $baseEmail = strtolower($firstName . '.' . $lastName) . '@example.com';
 
-
             $customerData = [
                 'first_name' => $firstName,
                 'last_name' => $lastName,
@@ -33,6 +32,7 @@ class CustomerServices
                 'email' => $baseEmail,
                 'is_frequent_customer' => $data['es_comun'] ?? false,
                 'city_id' => $cityId,
+                'country_id' => $countryId,
             ];
 
             $customer = $this->customerRepository->create($customerData);

@@ -6,10 +6,13 @@ use Carbon\Carbon;
 use App\Models\Block;
 use App\Enum\EventEnum;
 use App\Models\Customer;
+use App\Models\Segmentation;
 use Illuminate\Http\Request;
 use App\Enum\TypeCampaignEnum;
 use App\Services\CityServices;
 use App\Services\EventService;
+use App\Models\SegmentRegister;
+use App\Services\CountryServices;
 use App\Services\CustomerServices;
 use App\Factory\BlockActionFactory;
 use Illuminate\Support\Facades\Log;
@@ -19,12 +22,9 @@ use Illuminate\Support\Facades\Http;
 use App\Jobs\ProcessConsultationMedical;
 use App\Jobs\ProcessConsultationProductoPolis;
 
-
-
-
 class BlockController extends Controller
 {
-    /* public function __construct(private CityServices $cityServices, private DepartmentServices $departmentServices, private CustomerServices $customerServices, private EventService $eventServices) {} */
+    public function __construct(protected CityServices $cityServices, protected DepartmentServices $departmentServices, protected CountryServices $countryServices, protected CustomerServices $customerServices, protected EventService $eventServices) {}
     public function index()
     {
 
@@ -49,75 +49,120 @@ class BlockController extends Controller
 
         foreach ($blocks as $block) {
 
+
+            $segment = Segmentation::create([
+                'block_id' => $block->id
+            ]);
+
             $campaign = $block->campaign;
 
             if ($campaign->type_campaign == TypeCampaignEnum::Medical->value) {
 
-                ProcessConsultationMedical::dispatch($campaign);
+                //ProcessConsultationMedical::dispatch($campaign);
 
-                /* $country = $campaign->filters['country'];
-                $userType = $campaign->filters['user_type'];
-                $event = $campaign->filters['event'];
-                $confirmation = $campaign->filters['confirmation'] ? '1' : '0';
-                $event2 = $campaign->filters['event2'];
-                $confirmation2 = $campaign->filters['confirmation2'] ? '1' : '0';
+                
 
-
-
+                $country = $campaign->filters['country'];
+                $isLead = $campaign->filters['is_lead'];
+                $exists = $campaign->filters['exists'] ? '1' : '0';
+                $createdSince = $campaign->filters['created_since'];
+                $startDate = $campaign->filters['start_date'];
+                $endDate = $campaign->filters['end_date'];
+                $nextStepExecuted = $campaign->filters['next_step_executed'];
 
                 try {
 
-                    $response = Http::get('https://app.monaros.co/sistema/index.php/public_routes/get_clients_not_attend_demo', [
+                    $response = Http::get('https://app.monaros.co/sistema/index.php/public_routes/get_clients_by_scheduling_and_demo', [
                         'country' => $country,
-                        'user_type' => $userType,
-                        'event' => $event,
-                        'confirmation' => $confirmation,
-                        'event2' => $event2,
-                        'confirmation2' => $confirmation2
+                        'is_lead' => $isLead,
+                        'exists' => $exists,
+                        'created_since' => $createdSince,
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
+                        'next_step_executed' => $nextStepExecuted
                     ]);
-                    
+
+
                     if ($response->successful()) {
-                        $data = $response->json();
+
+                        $users = $response->json();
+
+
+                        foreach ($users['data'] as $user) {
+
+
+                            $department = $this->departmentServices->createDepartment($user['departamento'] ?? 'Default Department Name');
+                            $city = $this->cityServices->createCity($user['ciudad'] ?? 'Default City Name', $department->id);
+
+                            $country = $this->countryServices->createCountry($user['pais']);
+                            $customer = $this->customerServices->createCustomer($user, $city->id, $country->id);
+
+                            $customer->blocks()->syncWithoutDetaching([$block->id]);
+
+
+
+                            $event = $this->eventServices->createEvent($user, $customer->id);
+
+
+                            SegmentRegister::create([
+                                'segment_id' => $segment->id,
+                                'customer_id' => $customer->id,
+                            ]);
+
+
+                            //$this->processBlockSpecificLogic($block, $customer, $event);
+                        }
+
+                        /* foreach ($data as $customer) {
+                            SegmentRegister::create([
+                                'segment_id' => $segment->id,
+                                'customer_id' => $customer->id,
+                            ]);
+                        } */
                     }
-                    dd($country);
                 } catch (\Throwable $th) {
                     dd($th);
-                } */
+                }
             }
 
             if ($campaign->type_campaign == TypeCampaignEnum::ProductoPolis->value) {
 
-                
+                $query = Customer::with(['sales', 'sales.paymentMethod', 'sales.shop', 'sales.seller', 'sales.returnAlert', 'sales.segmentType']);
 
-                ProcessConsultationProductoPolis::dispatch($campaign);
-            }
-            /* Log::info("Procesando bloque ID: {$block->id}, Criterio: {$block->exit_criterion}");
-        
-            $action = BlockActionFactory::getAction($block->exit_criterion);
-        
-            if ($action) {
-                try {
-                    Log::info("Acción creada exitosamente: " . get_class($action));
                     
-                    $filters = [
-                        'country' => $block->campaign->filters['country'],
-                        'type_user' => $block->campaign->filters['user_type'],
-                        'event' => $block->campaign->filters['event'],
-                        'confirmation' => $block->campaign->filters['confirmation'] ? '1' : '0'
-                    ];
-                    
-                    Log::info("Ejecutando acción con filtros: " . json_encode($filters));
+                $filters = [
+                    'payment_method_id' => $campaign->filters['payment_method_id'] ?? null,
+                    'return_alert_id'   => $campaign->filters['alert'] ?? null,
+                    'department_id'     => $campaign->filters['department_id'] ?? null,
+                    'city_id'           => $campaign->filters['city_id'] ?? null,
+                    'seller_id'         => $campaign->filters['seller_id'] ?? null,
+                    'shop_id'           => $campaign->filters['shop_id'] ?? null,
+                    'segment_type_id'   => $campaign->filters['segment_type_id'] ?? null,
+                ];
+
+
+                $query->whereHas('sales', function ($salesQuery) use ($filters) {
+                    foreach ($filters as $column => $value) {
+                        if (!is_null($value)) {
+                            // Dependiendo del filtro, aplicar las condiciones correctas de forma específica
+                            if (in_array($column, ['payment_method_id', 'return_alert_id', 'shop_id', 'seller_id'])) {
+                                $salesQuery->where($column, $value); // Campos que pertenecen al modelo Sale
+                            }
+                        }
+                    }
+                });
+
+                $data = $query->get();
+
         
-                    $action->execute($block, $filters);
-        
-                    Log::info("Acción ejecutada para el bloque: {$block->id}");
-                } catch (\Exception $e) {
-                    Log::error("Error al ejecutar la acción para el bloque {$block->id}: {$e->getMessage()}");
-                    Log::error("Stack trace: " . $e->getTraceAsString());
+                foreach ($data as $customer) {
+                    SegmentRegister::create([
+                        'segment_id' => $segment->id,
+                        'customer_id' => $customer->id,
+                    ]);
                 }
-            } else {
-                Log::warning("No se encontró acción para el criterio: {$block->exit_criterion}");
-            } */
+        
+            }
         }
 
 

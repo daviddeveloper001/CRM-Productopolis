@@ -24,6 +24,8 @@ class Customer extends Model
         'email',
         'is_frequent_customer',
         'city_id',
+        'country_id',
+        'is_client'
     ];
 
     /**
@@ -35,11 +37,17 @@ class Customer extends Model
         'id' => 'integer',
         'is_frequent_customer' => 'boolean',
         'city_id' => 'integer',
+        'country_id' => 'integer'
     ];
 
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
     }
 
     public function sales(): HasMany

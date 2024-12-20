@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Segmentation extends Model
 {
@@ -22,7 +23,7 @@ class Segmentation extends Model
      */
     protected $fillable = [
         'name',
-        'campaign_id',
+        'block_id',
     ];
 
     /**
@@ -52,8 +53,8 @@ class Segmentation extends Model
         return $this->hasMany(SegmentRegister::class);
     }
 
-    public function campaign(): BelongsTo
+    public function block(): BelongsTo
     {
-        return $this->belongsTo(Campaign::class); // 'campaign_id' es la FK predeterminada
+        return $this->belongsTo(Block::class); 
     }
 }

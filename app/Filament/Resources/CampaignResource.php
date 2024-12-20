@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+
+use Closure;
 use Filament\Forms;
 use App\Models\City;
 use App\Models\Shop;
@@ -20,8 +22,8 @@ use Filament\Tables\Table;
 use App\Models\ReturnAlert;
 use App\Models\SegmentType;
 use App\Models\Segmentation;
-use App\Enum\TypeCampaignEnum;
 use App\Models\PaymentMethod;
+use App\Enum\TypeCampaignEnum;
 use Filament\Resources\Resource;
 use App\Enum\TypeSegmentationEnum;
 use App\Enum\EventProductoPolisEnum;
@@ -232,7 +234,7 @@ class CampaignResource extends Resource
                                         '2xl' => 4,
                                     ]),
 
-                                Select::make('filters.user_type')
+                                Select::make('filters.is_lead')
                                     ->label('Tipo de Usuario')
                                     ->Enum(UserTypeEnum::class)
                                     ->options(UserTypeEnum::class)
@@ -254,7 +256,7 @@ class CampaignResource extends Resource
                                         '2xl' => 4,
                                     ]),
 
-                                Toggle::make('filters.confirmation')
+                                Toggle::make('filters.exists')
                                     ->label('Confirmación')
                                     ->inline(false)
                                     ->columnSpan([
@@ -263,18 +265,19 @@ class CampaignResource extends Resource
                                         '2xl' => 4,
                                     ]),
 
-                                Select::make('filters.event2')
-                                    ->label('Criterio de entrada')
+                                Select::make('filters.exit_criterion')
+                                    ->label('Criterio de salida')
                                     ->enum(EventEnum::class)
                                     ->options(EventEnum::class)
+                                    ->reactive()
                                     ->columnSpan([
                                         'sm' => 2,
                                         'xl' => 3,
                                         '2xl' => 4,
                                     ]),
 
-                                Toggle::make('filters.confirmation2')
-                                    ->label('Confirmación')
+                                Toggle::make('filters.next_step_executed')
+                                    ->label('Ejecutado')
                                     ->inline(false)
                                     ->columnSpan([
                                         'sm' => 2,
@@ -282,14 +285,23 @@ class CampaignResource extends Resource
                                         '2xl' => 4,
                                     ]),
 
-                                DatePicker::make('filters.event_start_date')
+
+                                DatePicker::make('filters.created_since')
+                                    ->label('Creado desde')
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+
+                                DatePicker::make('filters.start_date')
                                     ->label('Fecha de inicio de evento')
                                     ->columnSpan([
                                         'sm' => 2,
                                         'xl' => 3,
                                         '2xl' => 4,
                                     ]),
-                                DatePicker::make('filters.event_end_date')
+                                DatePicker::make('filters.end_date')
                                     ->label('Fecha de finalización de evento')
                                     ->columnSpan([
                                         'sm' => 2,
@@ -309,8 +321,11 @@ class CampaignResource extends Resource
                             ->collapsible()
                             ->relationship('blocks')
                             ->label('Bloques')
-                            ->schema(Block::getForm())
-                            ->columnSpan(12),
+                            ->schema(Block::getForm(fn ($get) => [
+                                'exit_criterion' => $get('filters.exit_criterion'),
+                            ]))
+                            ->columnSpan(12)
+                            
                     ])
                     ->visible(fn($get) => $get('type_campaign') === TypeCampaignEnum::Medical->value),
 

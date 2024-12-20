@@ -9,13 +9,8 @@ class CityServices
 {
     public function __construct(private CityRepository $cityRepository) {}
 
-    public function createCity(string $cityName, int $departmentId) : City
+    public function createCity(string $cityName, int $departmentId): City
     {
-
-        if($cityName == null) {
-            return $cityName = 'Not found';
-        }
-        
         $searchCriteria = [
             'name' => $cityName
         ];

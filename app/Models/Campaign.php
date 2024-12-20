@@ -16,11 +16,6 @@ class Campaign extends Model
         'type_campaign' => 'string',
     ];
 
-    public function segments(): HasMany
-    {
-        return $this->hasMany(Segmentation::class);
-    }
-
     public function blocks() : HasMany
     {
         return $this->hasMany(Block::class);

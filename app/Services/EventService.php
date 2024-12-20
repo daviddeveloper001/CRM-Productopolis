@@ -14,10 +14,14 @@ class EventService
 
         return $this->eventRepository->create([
             'customer_id' => $customerId,
-            'event_start' => $eventData['event_start_date'] . ' ' . $eventData['event_start_time'],
-            'event_end' => $eventData['event_end_date'] . ' ' . $eventData['event_end_time'],
+            'event_start_date' => $eventData['event_start_date'],
+            'event_start_time' => $eventData['event_start_time'],
+            'event_end_date' => $eventData['event_end_date'],
+            'event_end_time' => $eventData['event_end_time'],
             'event_title' => $eventData['event_title'],
-            'event_description' => $eventData['event_description']
+            'event_description' => $eventData['event_description'],
+            'event_created_at' => $eventData['event_created_at'],
+            'event_attended' => $eventData['event_attended'],
         ]);
     }
 }

@@ -21,7 +21,8 @@ class SaleServices
         private ReturnAlertServices $returnAlertServices,
         private CityServices $cityServices,
         private DepartmentServices $departmentServices,
-        private SegmentTypeServices $segmentTypeServices
+        private SegmentTypeServices $segmentTypeServices,
+        private CountryServices $countryServices
 
     ) {}
 
@@ -41,15 +42,17 @@ class SaleServices
     {
         try {
 
-            $department = $this->departmentServices->createDepartment($data['departamento']);
-            $city = $this->cityServices->createCity($data['ciudad'], $department->id);
+            $department = $this->departmentServices->createDepartment($data['departamento']?? 'Default City Name');
+
+            $city = $this->cityServices->createCity($data['ciudad'] ?? 'Default City Name', $department->id);
             $segmentType = $this->segmentTypeServices->createSegmentType($data['segmentacion']);
             $shop = $this->shopServices->createShop($data['tienda']);
             $seller = $this->sellerServices->createSeller($data['vendedor']);
             $paymentMethod = $this->paymentMethodServices->createPaymentMethod($data['metodo_pago']);
             $returnAlert = $this->returnAlertServices->createReturnAlert($data['alerta_devolucion']);
-           
-            $customer = $this->customerServices->createCustomer($data, $city->id);
+            $country = $this->countryServices->createCountry($data['pais'] ?? 'Colombia');
+            
+            $customer = $this->customerServices->createCustomer($data, $city->id, $country->id);
 
             $lastSale = $this->saleRepository->findLastSaleByCustomer($customer->id);
 
