@@ -20,7 +20,7 @@ use Filament\Tables\Table;
 use App\Models\ReturnAlert;
 use App\Models\SegmentType;
 use App\Models\Segmentation;
-use App\Enum\TypeSegmentEnum;
+use App\Enum\TypeCampaignEnum;
 use App\Models\PaymentMethod;
 use Filament\Resources\Resource;
 use App\Enum\TypeSegmentationEnum;
@@ -79,12 +79,12 @@ class CampaignResource extends Resource
 
                 Section::make('Segmentación de campañas')
                     ->collapsible()
-                    ->description('Seleccionar tipo de segmentación')
+                    ->description('Seleccionar tipo de campana')
                     ->schema([
-                        Select::make('type_segment')
-                            ->label('Tipo de segmentación')
-                            ->enum(TypeSegmentEnum::class)
-                            ->options(TypeSegmentEnum::class)
+                        Select::make('type_campaign')
+                            ->label('Tipo de campana')
+                            ->enum(TypeCampaignEnum::class)
+                            ->options(TypeCampaignEnum::class)
                             ->live()
                     ]),
 
@@ -197,7 +197,7 @@ class CampaignResource extends Resource
 
                             ]),
                     ])
-                    ->visible(fn($get) => $get('type_segment') === 'ProductoPolis'),
+                    ->visible(fn($get) => $get('type_campaign') === TypeCampaignEnum::ProductoPolis->value),
                 Section::make('Bloques')
                     ->collapsible()
                     ->description('Agregar bloques a la campaña')
@@ -209,7 +209,7 @@ class CampaignResource extends Resource
                             ->schema(Block::getForm())
                             ->columnSpan(12),
                     ])
-                    ->visible(fn($get) => $get('type_segment') === 'ProductoPolis'),
+                    ->visible(fn($get) => $get('type_campaign') === TypeCampaignEnum::ProductoPolis->value),
 
                 Section::make('Filtros de segmentación')
                     ->collapsible()
@@ -299,7 +299,7 @@ class CampaignResource extends Resource
 
                             ]),
                     ])
-                    ->visible(fn($get) => $get('type_segment') === 'Medical'),
+                    ->visible(fn($get) => $get('type_campaign') === TypeCampaignEnum::Medical->value),
 
                 Section::make('Bloques')
                     ->collapsible()
@@ -312,7 +312,7 @@ class CampaignResource extends Resource
                             ->schema(Block::getForm())
                             ->columnSpan(12),
                     ])
-                    ->visible(fn($get) => $get('type_segment') === 'Medical'),
+                    ->visible(fn($get) => $get('type_campaign') === TypeCampaignEnum::Medical->value),
 
             ]);
     }

@@ -7,6 +7,8 @@ use App\Actions\SchedulingAction;
 use App\Services\CustomerServices;
 
 use App\Actions\DemonstrationAction;
+use App\Models\Campaign;
+use App\Observers\CampaigngObserver;
 use App\Services\DepartmentServices;
 use Illuminate\Support\ServiceProvider;
 
@@ -39,6 +41,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Campaign::observe(CampaigngObserver::class);
     }
 }

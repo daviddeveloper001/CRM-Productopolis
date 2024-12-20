@@ -7,6 +7,7 @@ use App\Models\Block;
 use App\Enum\EventEnum;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use App\Enum\TypeCampaignEnum;
 use App\Services\CityServices;
 use App\Services\EventService;
 use App\Services\CustomerServices;
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Services\DepartmentServices;
 use Illuminate\Support\Facades\Http;
+use App\Jobs\ProcessConsultationMedical;
+use App\Jobs\ProcessConsultationProductoPolis;
 
 
 
@@ -45,7 +48,50 @@ class BlockController extends Controller
 
 
         foreach ($blocks as $block) {
-            Log::info("Procesando bloque ID: {$block->id}, Criterio: {$block->exit_criterion}");
+
+            $campaign = $block->campaign;
+
+            if ($campaign->type_campaign == TypeCampaignEnum::Medical->value) {
+
+                ProcessConsultationMedical::dispatch($campaign);
+
+                /* $country = $campaign->filters['country'];
+                $userType = $campaign->filters['user_type'];
+                $event = $campaign->filters['event'];
+                $confirmation = $campaign->filters['confirmation'] ? '1' : '0';
+                $event2 = $campaign->filters['event2'];
+                $confirmation2 = $campaign->filters['confirmation2'] ? '1' : '0';
+
+
+
+
+                try {
+
+                    $response = Http::get('https://app.monaros.co/sistema/index.php/public_routes/get_clients_not_attend_demo', [
+                        'country' => $country,
+                        'user_type' => $userType,
+                        'event' => $event,
+                        'confirmation' => $confirmation,
+                        'event2' => $event2,
+                        'confirmation2' => $confirmation2
+                    ]);
+                    
+                    if ($response->successful()) {
+                        $data = $response->json();
+                    }
+                    dd($country);
+                } catch (\Throwable $th) {
+                    dd($th);
+                } */
+            }
+
+            if ($campaign->type_campaign == TypeCampaignEnum::ProductoPolis->value) {
+
+                
+
+                ProcessConsultationProductoPolis::dispatch($campaign);
+            }
+            /* Log::info("Procesando bloque ID: {$block->id}, Criterio: {$block->exit_criterion}");
         
             $action = BlockActionFactory::getAction($block->exit_criterion);
         
@@ -71,9 +117,9 @@ class BlockController extends Controller
                 }
             } else {
                 Log::warning("No se encontró acción para el criterio: {$block->exit_criterion}");
-            }
+            } */
         }
-        
+
 
         Log::info('Procesamiento de bloques completado.');
 

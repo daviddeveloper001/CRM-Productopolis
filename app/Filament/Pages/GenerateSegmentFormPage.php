@@ -102,7 +102,7 @@ class GenerateSegmentFormPage extends Page
         $data = $query->get();
 
         $segment = Segmentation::create([
-            'name' => $this->formData['name_segment'],
+            //'name' => $this->formData['name_segment'],
             'campaign_id' => $this->formData['campaign_id']
         ]);
 

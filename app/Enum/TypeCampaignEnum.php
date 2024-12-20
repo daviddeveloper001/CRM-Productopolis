@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum TypeSegmentEnum: string
+enum TypeCampaignEnum: string
 {
     case ProductoPolis = 'ProductoPolis';
     case Medical = 'Medical';

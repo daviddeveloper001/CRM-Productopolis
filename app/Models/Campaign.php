@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Campaign extends Model
 {
-    protected $fillable = ['name', 'start_date', 'end_date', 'filters'];
+    protected $fillable = ['name', 'start_date', 'end_date', 'filters', 'type_campaign'];
 
     protected $casts = [
         'filters' => 'array',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
+        'type_campaign' => 'string',
     ];
 
     public function segments(): HasMany
