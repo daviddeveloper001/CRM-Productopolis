@@ -1,13 +1,15 @@
 <?php
 
 namespace App\Providers;
+use App\Models\Campaign;
 use App\Services\CityServices;
 use App\Services\EventService;
 use App\Actions\SchedulingAction;
-use App\Services\CustomerServices;
 
+use App\Services\CountryServices;
+use App\Services\CustomerServices;
 use App\Actions\DemonstrationAction;
-use App\Models\Campaign;
+use App\Actions\MedicalAction;
 use App\Services\DepartmentServices;
 use Illuminate\Support\ServiceProvider;
 
@@ -20,8 +22,9 @@ class AppServiceProvider extends ServiceProvider
             return new SchedulingAction(
                 $app->make(CityServices::class),
                 $app->make(DepartmentServices::class),
+                $app->make(CountryServices::class),
                 $app->make(CustomerServices::class),
-                $app->make(EventService::class)
+                $app->make(EventService::class),
             );
         });
 
@@ -29,10 +32,12 @@ class AppServiceProvider extends ServiceProvider
             return new DemonstrationAction(
                 $app->make(CityServices::class),
                 $app->make(DepartmentServices::class),
+                $app->make(CountryServices::class),
                 $app->make(CustomerServices::class),
-                $app->make(EventService::class)
+                $app->make(EventService::class),
             );
         });
+
     }
 
     /**

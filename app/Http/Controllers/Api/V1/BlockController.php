@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Services\DepartmentServices;
 use Illuminate\Support\Facades\Http;
+use App\Factory\CampaignActionFactory;
 use App\Jobs\ProcessConsultationMedical;
 use App\Jobs\ProcessConsultationProductoPolis;
 
@@ -49,18 +50,32 @@ class BlockController extends Controller
 
         foreach ($blocks as $block) {
 
-
             $segment = Segmentation::create([
                 'block_id' => $block->id
             ]);
 
             $campaign = $block->campaign;
 
+            $typeCampaign = CampaignActionFactory::getAction($campaign->type_campaign);
+
+
+            if ($typeCampaign) {
+                try {
+                    $typeCampaign->executeCampaign($block);
+                } catch (\Throwable $th) {
+                    throw $th;
+                }
+            }
+
+
+            /* $segment = Segmentation::create([
+                'block_id' => $block->id
+            ]);
+
+            $campaign = $block->campaign;
+
             if ($campaign->type_campaign == TypeCampaignEnum::Medical->value) {
-
-                //ProcessConsultationMedical::dispatch($campaign);
-
-                
+                $action = BlockActionFactory::getAction($block->exit_criterion);
 
                 $country = $campaign->filters['country'];
                 $isLead = $campaign->filters['is_lead'];
@@ -70,66 +85,32 @@ class BlockController extends Controller
                 $endDate = $campaign->filters['end_date'];
                 $nextStepExecuted = $campaign->filters['next_step_executed'];
 
-                try {
-
-                    $response = Http::get('https://app.monaros.co/sistema/index.php/public_routes/get_clients_by_scheduling_and_demo', [
-                        'country' => $country,
-                        'is_lead' => $isLead,
-                        'exists' => $exists,
-                        'created_since' => $createdSince,
-                        'start_date' => $startDate,
-                        'end_date' => $endDate,
-                        'next_step_executed' => $nextStepExecuted
-                    ]);
-
-
-                    if ($response->successful()) {
-
-                        $users = $response->json();
-
-
-                        foreach ($users['data'] as $user) {
-
-
-                            $department = $this->departmentServices->createDepartment($user['departamento'] ?? 'Default Department Name');
-                            $city = $this->cityServices->createCity($user['ciudad'] ?? 'Default City Name', $department->id);
-
-                            $country = $this->countryServices->createCountry($user['pais']);
-                            $customer = $this->customerServices->createCustomer($user, $city->id, $country->id);
-
-                            $customer->blocks()->syncWithoutDetaching([$block->id]);
-
-
-
-                            $event = $this->eventServices->createEvent($user, $customer->id);
-
-
-                            SegmentRegister::create([
-                                'segment_id' => $segment->id,
-                                'customer_id' => $customer->id,
-                            ]);
-
-
-                            //$this->processBlockSpecificLogic($block, $customer, $event);
-                        }
-
-                        /* foreach ($data as $customer) {
-                            SegmentRegister::create([
-                                'segment_id' => $segment->id,
-                                'customer_id' => $customer->id,
-                            ]);
-                        } */
+                if ($action) {
+                    try {
+                        $action->execute($block, [
+                            'country' => $country,
+                            'is_lead' => $isLead,
+                            'exists' => $exists,
+                            'created_since' => $createdSince,
+                            'start_date' => $startDate,
+                            'end_date' => $endDate,
+                            'next_step_executed' => $nextStepExecuted
+                        ]);
+                        Log::info("Acción ejecutada para el bloque: {$block->id}");
+                    } catch (\Exception $e) {
+                        Log::error("Error al ejecutar la acción para el bloque {$block->id}: {$e->getMessage()}");
                     }
-                } catch (\Throwable $th) {
-                    dd($th);
+                } else {
+                    Log::warning("No se encontró acción para el criterio: {$block->exit_criterion}");
                 }
             }
+
 
             if ($campaign->type_campaign == TypeCampaignEnum::ProductoPolis->value) {
 
                 $query = Customer::with(['sales', 'sales.paymentMethod', 'sales.shop', 'sales.seller', 'sales.returnAlert', 'sales.segmentType']);
 
-                    
+
                 $filters = [
                     'payment_method_id' => $campaign->filters['payment_method_id'] ?? null,
                     'return_alert_id'   => $campaign->filters['alert'] ?? null,
@@ -154,15 +135,14 @@ class BlockController extends Controller
 
                 $data = $query->get();
 
-        
+
                 foreach ($data as $customer) {
                     SegmentRegister::create([
                         'segment_id' => $segment->id,
                         'customer_id' => $customer->id,
                     ]);
                 }
-        
-            }
+            } */
         }
 
 
