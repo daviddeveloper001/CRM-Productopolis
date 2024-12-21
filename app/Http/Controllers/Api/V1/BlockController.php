@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Http;
 use App\Factory\CampaignActionFactory;
 use App\Jobs\ProcessConsultationMedical;
 use App\Jobs\ProcessConsultationProductoPolis;
+use App\Models\Segment;
 
 class BlockController extends Controller
 {
@@ -50,7 +51,7 @@ class BlockController extends Controller
 
         foreach ($blocks as $block) {
 
-            $segment = Segmentation::create([
+            $segment = Segment::create([
                 'block_id' => $block->id
             ]);
 

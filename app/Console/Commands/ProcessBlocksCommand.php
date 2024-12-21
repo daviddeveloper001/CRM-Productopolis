@@ -11,6 +11,7 @@ use App\Models\SegmentRegister;
 use Illuminate\Console\Command;
 use App\Factory\BlockActionFactory;
 use App\Factory\CampaignActionFactory;
+use App\Models\Segment;
 use Illuminate\Support\Facades\Log;
 
 class ProcessBlocksCommand extends Command
@@ -35,7 +36,7 @@ class ProcessBlocksCommand extends Command
         foreach ($blocks as $block) {
 
 
-            Segmentation::create([
+            Segment::create([
                 'block_id' => $block->id
             ]);
             

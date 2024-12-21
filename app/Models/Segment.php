@@ -12,7 +12,6 @@ class Segment extends Model
     use HasFactory;
     
     protected $fillable = [
-        'name',
         'block_id',
     ];
 
@@ -23,7 +22,7 @@ class Segment extends Model
      */
     protected $casts = [
         'id' => 'integer',
-        'campaign_id' => 'integer',
+        'block_id' => 'integer',
     ];
 
     public function sales(): HasMany
@@ -34,7 +33,7 @@ class Segment extends Model
 
     public function customers()
     {
-        return $this->belongsToMany(Customer::class, 'customer_segments', 'segment_id', 'customer_id')
+        return $this->belongsToMany(Customer::class, 'customer_segments', 'customer_id', 'segment_id', )
             ->withTimestamps(); 
     }
 
