@@ -2,25 +2,15 @@
 
 namespace App\Models;
 
-use App\Models\Campaign;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Segmentation extends Model
+class Segment extends Model
 {
     use HasFactory;
-
-
-    protected $table = 'segmentations';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
+    
     protected $fillable = [
         'name',
         'block_id',
@@ -44,8 +34,8 @@ class Segmentation extends Model
 
     public function customers()
     {
-        return $this->belongsToMany(Customer::class, 'segment_registers', 'segment_id', 'customer_id')
-            ->withTimestamps(); // Indica una relación many-to-many
+        return $this->belongsToMany(Customer::class, 'customer_segments', 'segment_id', 'customer_id')
+            ->withTimestamps(); 
     }
 
     /* public function registers()

@@ -93,9 +93,15 @@ class Sale extends Model
         return $this->belongsTo(ReturnAlert::class);
     }
 
-    public function segmentRegisters() : HasMany
+    /* public function segmentRegisters() : HasMany
     {
         return $this->hasMany(SegmentRegister::class);
+    } */
+
+
+    public function customerSegments() : HasMany
+    {
+        return $this->hasMany(CustomerSegment::class);
     }
 
     public function segmentType() : BelongsTo

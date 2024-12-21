@@ -6,7 +6,7 @@ use App\Models\Sale;
 
 class SaleRepository extends BaseRepository 
 {
-    const RELATIONS = ['customer', 'shop', 'seller', 'segmentation', 'payment_method', 'returnAlert', 'segmentRegisters'];
+    const RELATIONS = ['customer', 'shop', 'seller', 'segmentation', 'payment_method', 'returnAlert', 'customerSegments'];
 
     public function __construct(Sale $sale)
     {

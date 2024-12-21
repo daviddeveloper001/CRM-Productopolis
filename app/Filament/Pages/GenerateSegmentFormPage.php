@@ -18,6 +18,7 @@ use App\Models\SegmentType;
 use App\Models\Segmentation;
 use Filament\Actions\Action;
 use App\Models\PaymentMethod;
+use App\Models\CustomerSegment;
 use App\Models\SegmentRegister;
 use Faker\Provider\ar_EG\Payment;
 use App\Models\SegmentionRegister;
@@ -107,9 +108,14 @@ class GenerateSegmentFormPage extends Page
         ]);
 
         foreach ($data as $customer) {
-            SegmentRegister::create([
+            /* SegmentRegister::create([
                 'segment_id' => $segment->id,
                 'customer_id' => $customer->id,
+            ]); */
+
+            CustomerSegment::create([
+                'customer_id' => $customer->id,
+                'segment_id' => $segment->id
             ]);
         }
 

@@ -40,9 +40,14 @@ class Block extends Model
     }
 
 
-    public function segment(): HasOne
+    /* public function segment(): HasOne
     {
         return $this->hasOne(Segmentation::class);
+    } */
+
+    public function segment(): HasOne
+    {
+        return $this->hasOne(Segment::class);
     }
 
     public static function boot()

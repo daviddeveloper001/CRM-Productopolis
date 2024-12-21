@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use App\Services\DepartmentServices;
 use Illuminate\Support\Facades\Http;
 use App\Interfaces\BlockActionInterface;
+use App\Models\CustomerSegment;
 
 abstract class AbstractBlockAction implements BlockActionInterface
 {
@@ -65,9 +66,13 @@ abstract class AbstractBlockAction implements BlockActionInterface
             }
 
             foreach ($users as $customer) {
-                SegmentRegister::create([
+                /* SegmentRegister::create([
                     'segment_id' => $block->segment->id,
                     'customer_id' => $customer->id,
+                ]); */
+                CustomerSegment::create([
+                    'customer_id' => $customer->id,
+                    'segment_id' => $block->segment->id
                 ]);
             }
 

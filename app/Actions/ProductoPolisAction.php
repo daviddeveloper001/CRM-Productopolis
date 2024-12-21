@@ -3,6 +3,7 @@ namespace App\Actions;
 
 use App\Models\Block;
 use App\Models\Customer;
+use App\Models\CustomerSegment;
 use App\Models\SegmentRegister;
 use App\Interfaces\CampaignActionInterface;
 
@@ -42,9 +43,14 @@ class ProductoPolisAction implements CampaignActionInterface
 
 
                 foreach ($data as $customer) {
-                    SegmentRegister::create([
+                    /* SegmentRegister::create([
                         'segment_id' => $block->segment->id,
                         'customer_id' => $customer->id,
+                    ]); */
+
+                    CustomerSegment::create([
+                        'customer_id' => $customer->id,
+                        'segment_id' => $block->segment->id
                     ]);
                 }
     }
