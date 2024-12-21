@@ -45,6 +45,7 @@ abstract class AbstractBlockAction implements BlockActionInterface
             'next_step_executed' => $nextStepExecuted
         ]);
 
+        dd($response->json());
 
         if ($response->successful()) {
             $users = $response->json();

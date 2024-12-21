@@ -11,7 +11,7 @@ class DemonstrationAction extends AbstractBlockAction
 
     protected function getApiEndpoint(): string
     {
-        return 'https://app.monaros.co/sistema/index.php/public_routes/get_clients_not_attend_demo';
+        return 'https://app.monaros.co/sistema/index.php/public_routes/get_clients_by_demo_and_estimate';
     }
     /* public function __construct(
         private CityServices $cityServices,
