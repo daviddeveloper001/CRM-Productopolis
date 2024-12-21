@@ -73,7 +73,8 @@ class Block extends Model
             Select::make('template_id')
                 ->label('Plantilla')
                 ->relationship('template', 'name')
-                ->required(),
+                ->required()
+                ->createOptionForm(Template::getForm()),
             DateTimePicker::make('start_date')
                 ->label('Fecha de inicio')
                 ->required(),
