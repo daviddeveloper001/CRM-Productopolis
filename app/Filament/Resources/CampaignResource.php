@@ -81,11 +81,12 @@ class CampaignResource extends Resource
 
                 Section::make('Segmentación de campañas')
                     ->collapsible()
-                    ->description('Seleccionar tipo de campana')
+                    ->description('Seleccionar tipo de campaña')
                     ->schema([
                         Select::make('type_campaign')
-                            ->label('Tipo de campana')
+                            ->label('Tipo de campaña')
                             ->enum(TypeCampaignEnum::class)
+                            ->required()
                             ->options(TypeCampaignEnum::class)
                             ->live()
                     ]),
