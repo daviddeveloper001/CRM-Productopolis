@@ -1,25 +1,31 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Jobs;
 
 use Carbon\Carbon;
 use App\Models\Block;
-use App\Models\Customer;
-use App\Models\Segmentation;
-use App\Enum\TypeCampaignEnum;
-use App\Models\SegmentRegister;
-use Illuminate\Console\Command;
-use App\Factory\BlockActionFactory;
-use App\Factory\CampaignActionFactory;
 use App\Models\Segment;
 use Illuminate\Support\Facades\Log;
+use App\Factory\CampaignActionFactory;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class ProcessBlocksCommand extends Command
+class ProcessBlocksJob implements ShouldQueue
 {
-    protected $signature = 'blocks:process';
-    protected $description = 'Procesa los bloques cuya fecha start_date coincide con el tiempo actual';
+    use Queueable;
 
-    public function handle()
+    /**
+     * Create a new job instance.
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Execute the job.
+     */
+    public function handle(): void
     {
         $now = Carbon::now()->floorMinute();
 
