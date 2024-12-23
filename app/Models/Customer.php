@@ -63,11 +63,11 @@ class Customer extends Model
     } */
 
 
-    public function segmentations()
+    /* public function segmentations()
     {
         return $this->belongsToMany(Segmentation::class, 'segment_registers', 'customer_id', 'segment_id')
-                    ->withTimestamps(); // Esto indica que la relación es many-to-many
-    }
+                    ->withTimestamps(); 
+    } */
 
     public function events(): HasMany
     {

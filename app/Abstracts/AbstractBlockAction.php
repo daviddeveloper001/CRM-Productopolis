@@ -45,7 +45,6 @@ abstract class AbstractBlockAction implements BlockActionInterface
             'next_step_executed' => $nextStepExecuted
         ]);
 
-        dd($response->json());
 
         if ($response->successful()) {
             $users = $response->json();
@@ -67,10 +66,6 @@ abstract class AbstractBlockAction implements BlockActionInterface
             }
 
             foreach ($users as $customer) {
-                /* SegmentRegister::create([
-                    'segment_id' => $block->segment->id,
-                    'customer_id' => $customer->id,
-                ]); */
                 CustomerSegment::create([
                     'customer_id' => $customer->id,
                     'segment_id' => $block->segment->id
