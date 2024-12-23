@@ -183,20 +183,39 @@ class CampaignResource extends Resource
                                         'xl' => 3,
                                         '2xl' => 4,
                                     ]),
-                                DatePicker::make('filters.date_first_order')
-                                    ->label('Fecha de inicio')
+                                /* DatePicker::make('filters.date_first_order')
+                                    ->label('Fecha Primera Orden')
                                     ->columnSpan([
                                         'sm' => 2,
                                         'xl' => 3,
                                         '2xl' => 4,
                                     ]),
+                                    
                                 DatePicker::make('filters.date_last_order')
-                                    ->label('Fecha de finalización')
+                                    ->label('Fecha Ultima orden')
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]), */
+
+
+                                DatePicker::make('filters.last_order_start')
+                                    ->label('Fecha Última Orden Inicio')
                                     ->columnSpan([
                                         'sm' => 2,
                                         'xl' => 3,
                                         '2xl' => 4,
                                     ]),
+                                DatePicker::make('filters.last_order_end')
+                                    ->label('Fecha Última Orden Fin')
+                                    ->columnSpan([
+                                        'sm' => 2,
+                                        'xl' => 3,
+                                        '2xl' => 4,
+                                    ]),
+
+
 
                             ]),
                     ])
@@ -227,7 +246,7 @@ class CampaignResource extends Resource
                                     ->label('Criterio de salida')
                                     ->enum(EventProductoPolisEnum::class)
                                     ->options(EventProductoPolisEnum::class)
-                                    ->default(EventProductoPolisEnum::Venta->value) 
+                                    ->default(EventProductoPolisEnum::Venta->value)
                             ])
                             ->columnSpan(12),
                     ])
