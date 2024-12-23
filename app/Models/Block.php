@@ -61,30 +61,4 @@ class Block extends Model
         });
     }
 
-
-
-    public static function getForm(): array
-    {
-        return [
-            TextInput::make('name')
-                ->label('Nombre')
-                ->required()
-                ->maxLength(255),
-            Select::make('template_id')
-                ->label('Plantilla')
-                ->relationship('template', 'name')
-                ->required()
-                ->createOptionForm(Template::getForm()),
-            DateTimePicker::make('start_date')
-                ->label('Fecha de inicio')
-                ->required(),
-
-            Select::make('exit_criterion')
-                ->label('Criterio de salida')
-                ->enum(EventEnum::class)
-                ->options(EventEnum::class)
-                ->hidden()
-                ->default($data['exit_criterion'] ?? null)
-        ];
-    }
 }

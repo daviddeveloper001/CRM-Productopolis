@@ -209,7 +209,26 @@ class CampaignResource extends Resource
                             ->collapsible()
                             ->relationship('blocks')
                             ->label('Bloques')
-                            ->schema(Block::getForm())
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Nombre')
+                                    ->required()
+                                    ->maxLength(255),
+                                Select::make('template_id')
+                                    ->label('Plantilla')
+                                    ->relationship('template', 'name')
+                                    ->required()
+                                    ->createOptionForm(Template::getForm()),
+                                DateTimePicker::make('start_date')
+                                    ->label('Fecha de inicio')
+                                    ->required(),
+
+                                Select::make('exit_criterion')
+                                    ->label('Criterio de salida')
+                                    ->enum(EventProductoPolisEnum::class)
+                                    ->options(EventProductoPolisEnum::class)
+                                    ->default(EventProductoPolisEnum::Venta->value) 
+                            ])
                             ->columnSpan(12),
                     ])
                     ->visible(fn($get) => $get('type_campaign') === TypeCampaignEnum::ProductoPolis->value),
@@ -268,9 +287,18 @@ class CampaignResource extends Resource
 
                                 Select::make('filters.exit_criterion')
                                     ->label('Criterio de salida')
-                                    ->enum(EventEnum::class)
-                                    ->options(EventEnum::class)
+                                    ->options(fn(callable $get) => match ($get('type_campaign')) {
+                                        TypeCampaignEnum::ProductoPolis->value => [
+                                            EventProductoPolisEnum::Venta->value => 'Venta',
+                                        ],
+                                        TypeCampaignEnum::Medical->value => collect(EventEnum::cases())
+                                            ->mapWithKeys(fn($event) => [$event->value => $event->name])
+                                            ->toArray(),
+                                        default => [],
+                                    })
+                                    ->hidden(fn(callable $get) => $get('type_campaign') !== TypeCampaignEnum::Medical->value)
                                     ->reactive()
+
                                     ->columnSpan([
                                         'sm' => 2,
                                         'xl' => 3,
@@ -322,11 +350,33 @@ class CampaignResource extends Resource
                             ->collapsible()
                             ->relationship('blocks')
                             ->label('Bloques')
-                            ->schema(Block::getForm(fn ($get) => [
-                                'exit_criterion' => $get('filters.exit_criterion'),
-                            ]))
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label('Nombre')
+                                    ->required()
+                                    ->maxLength(255),
+                                Select::make('template_id')
+                                    ->label('Plantilla')
+                                    ->relationship('template', 'name')
+                                    ->required()
+                                    ->createOptionForm(Template::getForm()),
+                                DateTimePicker::make('start_date')
+                                    ->label('Fecha de inicio')
+                                    ->required(),
+                                Select::make('exit_criterion')
+                                    ->label('Criterio de salida')
+                                    ->enum(EventEnum::class)
+                                    ->hidden()
+                            ])
+                            ->afterStateHydrated(function (array $state, callable $get, callable $set) {
+                                $exitCriterion = $get('filters.exit_criterion') ?? null;
+
+                                foreach ($state as &$block) {
+                                    $block['exit_criterion'] = $exitCriterion;
+                                }
+                            })
                             ->columnSpan(12)
-                            
+
                     ])
                     ->visible(fn($get) => $get('type_campaign') === TypeCampaignEnum::Medical->value),
 
