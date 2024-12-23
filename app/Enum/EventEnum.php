@@ -24,32 +24,32 @@ enum EventEnum: string
         };
     }
 
-    public function getWildcards(): array
+    static public function getWildcards($value): array
     {
-        return match ($this) {
-            self::Agendamiento => [
+        return match ($value) {
+            self::Agendamiento->value => [
                 '[NOMBRE-CLIENTE]',
                 '[TELEFONO-CLIENTE]',
                 '[EMAIL-CLIENTE]',
                 '[CIUDAD-CLIENTE]',
-                '[EVENT-START-DATE]',
-                '[EVENT-START-TIME]',
-                '[EVENT-END-DATE]',
-                '[EVENT-END-TIME]',
-                '[EVENT-TITLE]',
-                '[EVENT-DESCRIPTION]'
+                '[FECHA-INICIO-AGENDA]',
+                '[HORA-INICIO-AGENDA]',
+                '[FECHA-FIN-AGENDA]',
+                '[HORA-FIN-AGENDA]',
+                '[TITULO-AGENDA]',
+                '[DESCRIPCION-AGENDA]'
             ],
-            self::Demostracion => [
+            self::Demostracion->value => [
                 '[NOMBRE-CLIENTE]',
                 '[TELEFONO-CLIENTE]',
                 '[EMAIL-CLIENTE]',
                 '[CIUDAD-CLIENTE]',
-                '[EVENT-START-DATE]',
-                '[EVENT-START-TIME]',
-                '[EVENT-END-DATE]',
-                '[EVENT-END-TIME]',
-                '[EVENT-TITLE]',
-                '[EVENT-DESCRIPTION]'
+                '[FECHA-INICIO-AGENDA]',
+                '[HORA-INICIO-AGENDA]',
+                '[FECHA-FIN-AGENDA]',
+                '[HORA-FIN-AGENDA]',
+                '[TITULO-AGENDA]',
+                '[DESCRIPCION-AGENDA]'
             ]
         };
     }

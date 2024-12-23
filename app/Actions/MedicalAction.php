@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Enum\UserTypeEnum;
 use App\Models\Block;
 use App\Models\Campaign;
 use App\Factory\BlockActionFactory;
@@ -15,14 +16,14 @@ class MedicalAction implements CampaignActionInterface
         $action = BlockActionFactory::getAction($block->exit_criterion);
 
         $country = $block->campaign->filters['country'];
-        $isLead = $block->campaign->filters['is_lead'];
+        $isLead = $block->campaign->filters['is_lead'] == UserTypeEnum::LEAD->value ? '1' : '0';
         $exists = $block->campaign->filters['exists'] ? '1' : '0';
         $createdSince = $block->campaign->filters['created_since'];
         $startDate = $block->campaign->filters['start_date'];
         $endDate = $block->campaign->filters['end_date'];
-        $nextStepExecuted = $block->campaign->filters['next_step_executed'];
-        
-        
+        $nextStepExecuted = $block->campaign->filters['next_step_executed'] ? '1' : '0';
+
+
         if ($action) {
             try {
                 $action->execute($block, [

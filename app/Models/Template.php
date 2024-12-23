@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enum\EventEnum;
+use App\Enum\TypeCampaignEnum;
 use App\Utils\FormatUtils;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
@@ -13,6 +15,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -65,7 +68,7 @@ class Template extends Model
                     '2xl' => 12,
                 ]),
             Select::make('type')
-                ->label('Tipo')
+                ->label('Canal de comunicación')
                 ->options([
                     'whatsapp' => 'WhatsApp',
                     'email' => 'E-mail'
@@ -76,6 +79,34 @@ class Template extends Model
                     'xl' => 12,
                     '2xl' => 12,
                 ])
+                ->live(),
+            Select::make('campaign_type')
+                ->label('Para la empresa')
+                ->Enum(TypeCampaignEnum::class)
+                ->options(TypeCampaignEnum::class)
+                ->required()
+                ->columnSpan([
+                    'sm' => 12,
+                    'xl' => 12,
+                    '2xl' => 12,
+                ])
+                ->live(),
+            Select::make('event_type')
+                ->label('Para el evento')
+                ->options(function (callable $get) {
+                    return TypeCampaignEnum::getEvents($get('campaign_type'));
+                })
+                ->required()
+                ->columnSpan([
+                    'sm' => 12,
+                    'xl' => 12,
+                    '2xl' => 12,
+                ])
+                ->visible(fn($get) => $get('campaign_type') !== null)
+                ->afterStateUpdated(fn($state, callable $set, callable $get) => $set(
+                    'textos',
+                    TypeCampaignEnum::getEventWildcards($get('campaign_type'), $state)
+                ))
                 ->live(),
             Group::make()
                 ->schema([
@@ -89,33 +120,16 @@ class Template extends Model
                                     'xl' => 12,
                                     '2xl' => 12,
                                 ]),
-                            Grid::make([
-                                'default' => 1,
-                                'sm' => 2,
-                                'md' => 3,
-                                'lg' => 4,
-                                'xl' => 6,
-                                '2xl' => 8,
-                            ])
-                                ->schema([
-                                    Placeholder::make('1')
-                                        ->label('[NOMBRE-CLIENTE]'),
-                                    Placeholder::make('2')
-                                        ->label('[TELEFONO-CLIENTE]'),
-                                    Placeholder::make('3')
-                                        ->label('[EMAIL-CLIENTE]'),
-                                    Placeholder::make('3')
-                                        ->label('[CIUDAD-CLIENTE]'),
-                                    Placeholder::make('3')
-                                        ->label('[EVENT-START-DATE]'),
-                                    Placeholder::make('3')
-                                        ->label('[EVENT-END-DATE]'),
-                                    Placeholder::make('3')
-                                        ->label('[EVENT-TITLE]'),
-                                    Placeholder::make('3')
-                                        ->label('[EVENT-DESCRIPTION]')
-                                ])
-                                ->columns(3),
+                            Grid::make(3) // Número de columnas en la cuadrícula
+                                ->schema(function ($get) {
+                                    $textos = $get('textos') ?? [];
+                                    $result = array_map(function ($texto, $index) {
+                                        return Placeholder::make('Comodín #' . $index)->label($texto);
+                                    }, $textos, array_keys($textos));
+
+                                    return $result;
+                                })
+                                ->columnSpan(12),
                             Textarea::make('content')
                                 ->label('Contenido')
                                 ->rows(10)
@@ -153,36 +167,13 @@ class Template extends Model
                         ]),
                     Section::make('Previsualización')
                         ->schema([
-                            Select::make('preview_with')
-                                ->label('Previsualizar con')
-                                ->options(function () {
-                                    return Customer::all()->mapWithKeys(function ($customer) {
-                                        return [$customer->id => $customer->first_name . ' ' . $customer->last_name];
-                                    });
-                                })
-                                ->columnSpan([
-                                    'sm' => 12,
-                                    'xl' => 12,
-                                    '2xl' => 12,
-                                ])
-                                ->live(),
                             Placeholder::make('preview')
                                 ->content(
                                     fn($get) => $get('type') === 'whatsapp'
                                         ? new HtmlString(
-                                            FormatUtils::parseWhatsAppFormatting(
-                                                FormatUtils::replaceCustomerPlaceholders(
-                                                    $get('content'),
-                                                    $get('preview_with')
-                                                )
-                                            )
+                                            FormatUtils::parseWhatsAppFormatting($get('content'))
                                         )
-                                        : new HtmlString(
-                                            FormatUtils::replaceCustomerPlaceholders(
-                                                $get('content'),
-                                                $get('preview_with')
-                                            )
-                                        )
+                                        : $get('content')
                                 )
                                 ->columnSpan([
                                     'sm' => 12,
@@ -196,7 +187,11 @@ class Template extends Model
                             '2xl' => 6,
                         ]),
                 ])
-                ->visible(fn($get) => !empty($get('type')))
+                ->visible(
+                    fn($get) => !empty($get('type')) &&
+                        !empty($get('campaign_type')) &&
+                        !empty($get('event_type'))
+                )
                 ->columnSpan([
                     'sm' => 12,
                     'xl' => 12,
