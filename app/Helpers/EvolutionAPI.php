@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Models\Config;
 use App\Models\Template;
+use App\Models\WhatsAppList;
 use App\Utils\FileUtils;
 use App\Utils\FormatUtils;
 
@@ -25,7 +26,7 @@ class EvolutionAPI
         }
     }
 
-    static function whatsapp_sent_EA($number, $message, $message_type, $instance)
+    static function whatsapp_sent_EA($number, $message, $message_type, $instance = "SUPPORT")
     {
         $instance = self::get_instance($instance);
 
@@ -68,7 +69,7 @@ class EvolutionAPI
         return "-1";
     }
 
-    static function whatsapp_send_media_EA($number, $message, $instance, $media, $filename)
+    static function whatsapp_send_media_EA($number, $message, $instance = "SUPPORT", $media, $filename)
     {
         $instance = self::get_instance($instance);
 
@@ -118,7 +119,7 @@ class EvolutionAPI
         return "-1";
     }
 
-    static function whatsapp_send_audio_EA($number, $instance, $media)
+    static function whatsapp_send_audio_EA($number, $instance = "SUPPORT", $media)
     {
         $instance = self::get_instance($instance);
 
@@ -161,7 +162,45 @@ class EvolutionAPI
         return "-1";
     }
 
-    static function whatsapp_send_message_EA($filename, $fileURL, $phone, $content, $instance)
+    static function whatsapp_sent_list_EA($number, $data, $instance = "SUPPORT")
+    {
+        $instance = self::get_instance($instance);
+
+        if (!empty($number)) {
+            $curl = curl_init();
+
+            $headers = [
+                "Content-Type: application/json",
+                "apikey: " . $instance['api_key']
+            ];
+
+            curl_setopt_array($curl, [
+                CURLOPT_URL => "https://apiwhatsapp.medicalsoft.ai/message/sendList/" . $instance['instance'],
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_POSTFIELDS => json_encode($data),
+                CURLOPT_HTTPHEADER => $headers,
+            ]);
+
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+
+            curl_close($curl);
+
+            if ($err) {
+                return "cURL Error #:" . $err;
+            } else {
+                return $response;
+            }
+        }
+        return "-1";
+    }
+
+    static function whatsapp_send_message_EA($filename, $fileURL, $phone, $content, $instance = "SUPPORT")
     {
         if (!empty($filename)) {
 
@@ -205,8 +244,39 @@ class EvolutionAPI
             /*$dataToSend['attachment_url'],*/
             "https://olondriz.com/wp-content/uploads/2020/04/ambar-perrito-1.jpg",
             $dataToSend['phone'],
-            $dataToSend['message'],
-            'SALES'
+            $dataToSend['message']
         );
+    }
+
+    static function send_whatsapp_list_EA($listId, $number)
+    {
+        $whatsAppList = WhatsAppList::with(['sections.options'])->findOrFail($listId);
+
+        $data = [
+            "number" => $number,
+            "title" => $whatsAppList->title,
+            "description" => $whatsAppList->description,
+            "buttonText" => $whatsAppList->button_text,
+            "footerText" => $whatsAppList->footer_text,
+            "sections" => []
+        ];
+
+        foreach ($whatsAppList->sections as $section) {
+            $rows = [];
+            foreach ($section->options as $option) {
+                $rows[] = [
+                    "title" => $option->title,
+                    "description" => $option->description,
+                    "rowId" => "rowId_" . $option->id
+                ];
+            }
+
+            $data["sections"][] = [
+                "title" => $section->title,
+                "rows" => $rows
+            ];
+        }
+
+        return self::whatsapp_sent_list_EA($number, $data);
     }
 }
