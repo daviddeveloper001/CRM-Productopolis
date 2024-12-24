@@ -78,5 +78,10 @@ class Customer extends Model
     {
         return $this->belongsToMany(Block::class, 'block_customer');
     }
+
+    public function segments() : BelongsToMany
+    {
+        return $this->belongsToMany(Segment::class, 'customer_segments', 'customer_id', 'segment_id')->withTimestamps();
+    }
     
 }

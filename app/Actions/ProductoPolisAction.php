@@ -40,7 +40,6 @@ class ProductoPolisAction implements CampaignActionInterface
 
 
         $query->whereHas('sales', function ($salesQuery) use ($filters, $last_order_start, $last_order_end) {
-            // Itera sobre los filtros específicos
             foreach ($filters as $column => $value) {
                 if (!is_null($value)) {
                     $salesQuery->where($column, $value);
@@ -49,7 +48,7 @@ class ProductoPolisAction implements CampaignActionInterface
 
 
             if (!is_null($last_order_start) && !is_null($last_order_end)) {
-                //dd($last_order_start, $last_order_end);
+
                 $salesQuery->whereBetween('date_last_order', [$last_order_start, $last_order_end]);
             }
         });

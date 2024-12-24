@@ -27,10 +27,10 @@ class Block extends Model
         return $this->belongsTo(Template::class);
     }
 
-    public function customers(): BelongsToMany
+    /* public function customers(): BelongsToMany
     {
         return $this->belongsToMany(Customer::class, 'block_customer');
-    }
+    } */
 
 
 
@@ -48,17 +48,6 @@ class Block extends Model
     public function segment(): HasOne
     {
         return $this->hasOne(Segment::class);
-    }
-
-    public static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($block) {
-            if (!$block->exit_criterion && $block->campaign) {
-                $block->exit_criterion = $block->campaign->filters['exit_criterion'] ?? null;
-            }
-        });
     }
 
 }

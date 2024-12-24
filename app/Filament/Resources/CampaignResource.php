@@ -38,6 +38,11 @@ use Filament\Forms\Components\DateTimePicker;
 use App\Filament\Resources\CampaignResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CampaignResource\RelationManagers;
+use Filament\Tables\Actions\Action;
+use App\Actions\Star;
+use App\Actions\ResetStars;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action as FormAction;
 
 class CampaignResource extends Resource
 {
@@ -102,6 +107,16 @@ class CampaignResource extends Resource
                                 '2xl' => 8,
                             ])
                             ->schema([
+                                /* Actions::make([
+                                    FormAction::make('report')
+                                        ->label('Reporte')
+                                        ->icon('heroicon-m-star')
+                                        ->requiresConfirmation()
+                                        ->url(fn($record) => route('filament.pages.report-view', ['record' => $record->id]))
+                                        ->openUrlInNewTab()
+
+
+                                ]), */
                                 Select::make('filters.payment_method_id')
                                     ->label('Método de pago')
                                     ->options(PaymentMethod::all()->pluck('name', 'id'))
@@ -183,32 +198,17 @@ class CampaignResource extends Resource
                                         'xl' => 3,
                                         '2xl' => 4,
                                     ]),
-                                /* DatePicker::make('filters.date_first_order')
-                                    ->label('Fecha Primera Orden')
-                                    ->columnSpan([
-                                        'sm' => 2,
-                                        'xl' => 3,
-                                        '2xl' => 4,
-                                    ]),
-                                    
-                                DatePicker::make('filters.date_last_order')
-                                    ->label('Fecha Ultima orden')
-                                    ->columnSpan([
-                                        'sm' => 2,
-                                        'xl' => 3,
-                                        '2xl' => 4,
-                                    ]), */
 
 
                                 DatePicker::make('filters.last_order_start')
-                                    ->label('Fecha Última Orden Inicio')
+                                    ->label('Fecha Última Orden Desde')
                                     ->columnSpan([
                                         'sm' => 2,
                                         'xl' => 3,
                                         '2xl' => 4,
                                     ]),
                                 DatePicker::make('filters.last_order_end')
-                                    ->label('Fecha Última Orden Fin')
+                                    ->label('Fecha Última Orden Hasta')
                                     ->columnSpan([
                                         'sm' => 2,
                                         'xl' => 3,
@@ -411,11 +411,11 @@ class CampaignResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('Fecha de inicio')
-                    ->numeric()
+                    ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('end_date')
                     ->label('Fecha de finalización')
-                    ->numeric()
+                    ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -431,6 +431,11 @@ class CampaignResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Action::make('Reporte')
+                    ->label('Ver Reporte')
+                    ->color('success')
+                    ->url(fn($record) => route('filament.pages.report-view', ['record' => $record->id]))
+                    ->openUrlInNewTab()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

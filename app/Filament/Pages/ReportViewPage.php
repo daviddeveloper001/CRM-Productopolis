@@ -2,12 +2,14 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Campaign;
 use App\Models\Sale;
 use Filament\Tables;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
 use App\Models\Segmentation;
 use App\Models\SalesComparative;
+use App\Models\Segment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -29,7 +31,18 @@ class ReportViewPage extends Page implements HasTable
 
     public function mount($record)
     {
-        $segment = Segmentation::find($record);
+        $campaign = Campaign::find($record);
+        $block = $campaign->blocks()->first();
+
+        if (!$block || !$block->segment) {
+            throw new \Exception("No se encontró un segmento relacionado.");
+        }
+    
+        // Obtener el Segmento relacionado al Bloque
+        $segment = $block->segment;
+
+   
+        // Procesar los clientes del Segmento
         $this->processCustomerSales($segment->customers);
     }
 

@@ -10,6 +10,8 @@ use App\Services\CountryServices;
 use App\Services\CustomerServices;
 use App\Actions\DemonstrationAction;
 use App\Actions\MedicalAction;
+use App\Models\Block;
+use App\Observers\BlockObserver;
 use App\Services\DepartmentServices;
 use Illuminate\Support\ServiceProvider;
 
@@ -45,6 +47,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        
+        Block::observe(BlockObserver::class);
     }
 }
