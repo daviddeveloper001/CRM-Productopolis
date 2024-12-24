@@ -2,6 +2,8 @@
 
 namespace App\Enum;
 
+use App\Utils\FormatUtils;
+
 enum EventEnum: string
 {
     case Agendamiento = 'Agendamiento';
@@ -32,25 +34,26 @@ enum EventEnum: string
                 '[TELEFONO-CLIENTE]',
                 '[EMAIL-CLIENTE]',
                 '[CIUDAD-CLIENTE]',
-                '[FECHA-INICIO-AGENDA]',
+                /*'[FECHA-INICIO-AGENDA]',
                 '[HORA-INICIO-AGENDA]',
                 '[FECHA-FIN-AGENDA]',
                 '[HORA-FIN-AGENDA]',
                 '[TITULO-AGENDA]',
-                '[DESCRIPCION-AGENDA]'
+                '[DESCRIPCION-AGENDA]'*/
             ],
             self::Demostracion->value => [
                 '[NOMBRE-CLIENTE]',
                 '[TELEFONO-CLIENTE]',
                 '[EMAIL-CLIENTE]',
                 '[CIUDAD-CLIENTE]',
-                '[FECHA-INICIO-AGENDA]',
+                /*'[FECHA-INICIO-AGENDA]',
                 '[HORA-INICIO-AGENDA]',
                 '[FECHA-FIN-AGENDA]',
                 '[HORA-FIN-AGENDA]',
                 '[TITULO-AGENDA]',
-                '[DESCRIPCION-AGENDA]'
-            ]
+                '[DESCRIPCION-AGENDA]'*/
+            ],
+            default => []
         };
     }
 }

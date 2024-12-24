@@ -36,7 +36,9 @@ class Template extends Model
         'type',
         'content',
         'whatsapp_list_id',
-        'attachment'
+        'attachment',
+        'campaign_type',
+        'event_type',
     ];
 
 
@@ -94,7 +96,7 @@ class Template extends Model
             Select::make('event_type')
                 ->label('Para el evento')
                 ->options(function (callable $get) {
-                    return TypeCampaignEnum::getEvents($get('campaign_type'));
+                    return TypeCampaignEnum::getEvents($get('campaign_type')) ?? [];
                 })
                 ->required()
                 ->columnSpan([
@@ -103,10 +105,11 @@ class Template extends Model
                     '2xl' => 12,
                 ])
                 ->visible(fn($get) => $get('campaign_type') !== null)
-                ->afterStateUpdated(fn($state, callable $set, callable $get) => $set(
-                    'textos',
-                    TypeCampaignEnum::getEventWildcards($get('campaign_type'), $state)
-                ))
+                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    $wildcards = TypeCampaignEnum::getEventWildcards($get('campaign_type'), $state);
+
+                    $set('textos', $wildcards);
+                })
                 ->live(),
             Group::make()
                 ->schema([
@@ -199,9 +202,9 @@ class Template extends Model
                 ]),
             Select::make('whatsapp_list_id')
                 ->label('Listado de opciones')
-                ->relationship('whatsappList', 'title')
+                ->options(WhatsAppList::all()->pluck('title', 'id'))
+                ->nullable()
                 ->visible(fn($get) => $get('type') === 'whatsapp')
-                ->preload()
                 ->createOptionForm([
                     Grid::make()
                         ->schema([

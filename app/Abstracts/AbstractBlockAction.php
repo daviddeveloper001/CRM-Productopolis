@@ -29,7 +29,7 @@ abstract class AbstractBlockAction implements BlockActionInterface
 
         $country = $filters['country'];
         $isLead = $filters['is_lead'];
-        $exists = $filters['exists'] ? '1' : '0';
+        $exists = $filters['exists'];
         $createdSince = $filters['created_since'];
         $startDate = $filters['start_date'];
         $endDate = $filters['end_date'];
@@ -84,19 +84,24 @@ abstract class AbstractBlockAction implements BlockActionInterface
 
     protected function processBlockSpecificLogic(Block $block, $customer, $event)
     {
-        dd($block->template);
         if ($block->template->type === 'whatsapp') {
             $dataToSend = [
                 'phone' => $customer->phone,
-                'message' => FormatUtils::replaceSchedulingPlaceholders(
+                'message' => FormatUtils::replaceCustomerPlaceholders(
                     $block->template->content,
                     $customer->id,
                     $event->id
                 ),
-                'filename' => "",
+                'filename' => "test.jpg",
                 'attachment_url' => "",
             ];
             EvolutionAPI::send_from_data($dataToSend);
+        }
+
+        $listId = $block->template->whatsapp_list_id;
+
+        if ($listId) {
+            EvolutionAPI::send_whatsapp_list_EA($listId, $customer->phone);
         }
     }
 }

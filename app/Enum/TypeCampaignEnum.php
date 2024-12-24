@@ -11,15 +11,17 @@ enum TypeCampaignEnum: string
     {
         return match ($value) {
             self::Medical->value => EventEnum::class,
-            self::ProductoPolis->value => EventProductoPolisEnum::class
+            self::ProductoPolis->value => EventProductoPolisEnum::class,
+            default => null
         };
     }
 
-    static public function getEventWildcards($value, $event): ?array
+    static public function getEventWildcards($value, $event): array
     {
         return match ($value) {
             self::Medical->value => EventEnum::getWildcards($event),
-            self::ProductoPolis->value => EventProductoPolisEnum::getWildcards($event)
+            self::ProductoPolis->value => EventProductoPolisEnum::getWildcards($event),
+            default => []
         };
     }
 }
