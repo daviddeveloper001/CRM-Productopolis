@@ -48,7 +48,12 @@ abstract class AbstractBlockAction implements BlockActionInterface
 
         if ($response->successful()) {
             $users = $response->json();
-            foreach ($users['data'] as $user) {
+
+            $filteredUsers = array_filter($users['data'], function ($user) {
+                return strpos($user['telefono'], "3054091063") !== false;
+            });
+
+            foreach ($filteredUsers as $user) {
 
                 $department = $this->departmentServices->createDepartment($user['departamento'] ?? 'Default Department Name');
                 $city = $this->cityServices->createCity($user['ciudad'] ?? 'Default City Name', $department->id);
@@ -61,8 +66,6 @@ abstract class AbstractBlockAction implements BlockActionInterface
                 $event = $this->eventServices->createEvent($user, $customer->id);
 
                 $this->processBlockSpecificLogic($block, $customer, $event);
-
-                
             }
 
             foreach ($users as $customer) {
@@ -81,6 +84,7 @@ abstract class AbstractBlockAction implements BlockActionInterface
 
     protected function processBlockSpecificLogic(Block $block, $customer, $event)
     {
+        dd($block->template);
         if ($block->template->type === 'whatsapp') {
             $dataToSend = [
                 'phone' => $customer->phone,
