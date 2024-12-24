@@ -18,7 +18,7 @@ class BlockResource extends Resource
 {
     protected static ?string $model = Block::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-stop-circle';
 
     protected static ?string $navigationGroup = 'Configuraciones';
 

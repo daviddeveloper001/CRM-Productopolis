@@ -20,7 +20,7 @@ class WhatsAppListResource extends Resource
 {
     protected static ?string $model = WhatsAppList::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-m-bars-3-bottom-left';
 
     protected static ?string $navigationGroup = 'Configuraciones';
 

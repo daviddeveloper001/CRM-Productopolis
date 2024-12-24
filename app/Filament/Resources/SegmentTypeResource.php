@@ -17,7 +17,7 @@ class SegmentTypeResource extends Resource
 {
     protected static ?string $model = SegmentType::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-c-rectangle-group';
 
     protected static ?string $navigationGroup = 'Configuraciones';
 
