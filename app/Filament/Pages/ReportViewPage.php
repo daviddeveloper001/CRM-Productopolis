@@ -51,6 +51,7 @@ class ReportViewPage extends Page implements HasTable
     {
         SalesComparative::truncate(); // (Opcional) Elimina datos antiguos antes de procesar nuevos registros
     
+        $cont = 0;
         foreach ($customers as $customer) {
             $lastSale = Sale::where('customer_id', $customer->id)
                 ->orderBy('date_last_order', 'desc')

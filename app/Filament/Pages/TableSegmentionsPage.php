@@ -43,6 +43,8 @@ class TableSegmentionsPage extends Page implements HasTable
     protected static ?string $title = 'Tabla de Segmentaciones';
     protected static ?string $model = Segmentation::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
 
     public $data;
 

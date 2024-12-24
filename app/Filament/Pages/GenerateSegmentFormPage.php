@@ -43,6 +43,8 @@ class GenerateSegmentFormPage extends Page
 
     public $is_unique = true;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     //protected static ?string $model = Sale::class;
 
     public $formData = [];
