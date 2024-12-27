@@ -431,6 +431,7 @@ class CampaignResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
                 Action::make('Reporte')
                     ->label('Ver Reporte')
                     ->color('success')
@@ -457,6 +458,8 @@ class CampaignResource extends Resource
             'index' => Pages\ListCampaigns::route('/'),
             'create' => Pages\CreateCampaign::route('/create'),
             'edit' => Pages\EditCampaign::route('/{record}/edit'),
+            'view' => Pages\ViewCampaign::route('/{record}/view'),
+            'report' => Pages\ReportCampaign::route('/{record}/report'),
         ];
     }
 }

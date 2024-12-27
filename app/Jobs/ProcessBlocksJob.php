@@ -42,11 +42,6 @@ class ProcessBlocksJob implements ShouldQueue
         foreach ($blocks as $block) {
 
 
-            Segment::create([
-                'block_id' => $block->id
-            ]);
-            
-
             $campaign = $block->campaign;
 
             $typeCampaign = CampaignActionFactory::getAction($campaign->type_campaign);

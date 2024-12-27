@@ -2,17 +2,26 @@
 
 namespace App\Actions;
 
+use Carbon\Carbon;
 use App\Models\Block;
+use App\Models\Segment;
+use App\Models\Campaign;
 use App\Models\Customer;
 use App\Models\CustomerSegment;
+use Illuminate\Support\Facades\DB;
+use App\Repositories\SaleRepository;
 use App\Interfaces\CampaignActionInterface;
-
 
 
 class ProductoPolisAction implements CampaignActionInterface
 {
+    public function __construct(private SaleRepository $saleRepository) {}
     public function executeCampaign(Block $block): void
     {
+        $segment = Segment::create([
+            'block_id' => $block->id
+        ]);
+
         $query = Customer::with([
             'sales',
             'sales.paymentMethod',
@@ -22,8 +31,8 @@ class ProductoPolisAction implements CampaignActionInterface
             'sales.segmentType',
         ]);
 
-
-        $campaignFilters = $block->campaign->filters ?? [];
+        $campaign = $block->campaign;
+        $campaignFilters = $campaign->filters ?? [];
         $filters = [
             'payment_method_id' => $campaignFilters['payment_method_id'] ?? null,
             'return_alert_id'   => $campaignFilters['alert'] ?? null,
@@ -57,15 +66,65 @@ class ProductoPolisAction implements CampaignActionInterface
             $query->limit($limit);
         }
 
+        $query->get();
 
 
-        $customers = $query->get();
+        $campaign = $block->campaign;
 
-        foreach ($customers as $customer) {
-            CustomerSegment::create([
-                'customer_id' => $customer->id,
-                'segment_id' => $block->segment->id,
-            ]);
+        // Excluir clientes ya asociados a la campaña
+        $existingCustomerIds = DB::table('campaign_customers')
+            ->where('campaign_id', $campaign->id)
+            ->pluck('customer_id');
+        $newCustomers = $query->whereNotIn('id', $existingCustomerIds)->get();
+
+
+        // Asociar nuevos clientes al segmento del bloque
+
+        //$segment->customers()->syncWithoutDetaching($newCustomers->pluck('id')->toArray());
+
+        $campaign->customers()->syncWithoutDetaching($newCustomers->pluck('id')->toArray());
+
+        $this->notifyCustomersWithoutRecentPurchase($campaign);
+    }
+
+
+    public function findCustomersWithoutRecentPurchase(Campaign $campaign)
+    {
+        $customers = DB::table('campaign_customers')
+            ->where('campaign_id', $campaign->id)
+            ->get(['customer_id', 'last_purchase_at']);
+
+        $customersWithoutRecentPurchase = $customers->map(function ($customer) {
+            $latestOrder = $this->saleRepository->findLastSaleByCustomer($customer->customer_id);
+
+            if (!$latestOrder || $latestOrder->date_last_order <= $customer->last_purchase_at) {
+                return [
+                    'customer_id' => $customer->customer_id,
+                    'last_purchase_at' => $customer->last_purchase_at,
+                ];
+            }
+
+            return null;
+        })->filter();
+
+
+        return $customersWithoutRecentPurchase;
+    }
+
+
+
+    public function notifyCustomersWithoutRecentPurchase(Campaign $campaign)
+    {
+
+        $customersWithoutRecentPurchase = $this->findCustomersWithoutRecentPurchase($campaign);
+
+        foreach ($customersWithoutRecentPurchase as $customer) {
+            $this->sendNotification($customer);
         }
+    }
+
+    protected function sendNotification($customer)
+    {
+        dd('enviado mensaje ');
     }
 }

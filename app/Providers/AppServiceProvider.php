@@ -1,17 +1,18 @@
 <?php
 
 namespace App\Providers;
+use App\Models\Block;
 use App\Models\Campaign;
+use App\Actions\MedicalAction;
 use App\Services\CityServices;
-use App\Services\EventService;
-use App\Actions\SchedulingAction;
 
+use App\Services\EventService;
+use App\Observers\BlockObserver;
+use App\Actions\SchedulingAction;
 use App\Services\CountryServices;
 use App\Services\CustomerServices;
+use App\Observers\CampaignObserver;
 use App\Actions\DemonstrationAction;
-use App\Actions\MedicalAction;
-use App\Models\Block;
-use App\Observers\BlockObserver;
 use App\Services\DepartmentServices;
 use Illuminate\Support\ServiceProvider;
 
@@ -47,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Block::observe(BlockObserver::class);
+        //Block::observe(BlockObserver::class);
+        Campaign::observe(CampaignObserver::class);
     }
 }

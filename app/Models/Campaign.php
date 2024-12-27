@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Campaign extends Model
 {
@@ -16,8 +17,14 @@ class Campaign extends Model
         'type_campaign' => 'string',
     ];
 
-    public function blocks() : HasMany
+    public function blocks(): HasMany
     {
         return $this->hasMany(Block::class);
+    }
+
+    public function customers(): BelongsToMany
+    {
+        return $this->belongsToMany(Customer::class, 'campaign_customers')
+            ->withTimestamps();
     }
 }
