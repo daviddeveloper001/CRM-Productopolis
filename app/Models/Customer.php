@@ -83,5 +83,11 @@ class Customer extends Model
     {
         return $this->belongsToMany(Segment::class, 'customer_segments', 'customer_id', 'segment_id')->withTimestamps();
     }
+
+    public function campaigns(): BelongsToMany
+    {
+        return $this->belongsToMany(Campaign::class, 'campaign_customers')
+            ->withTimestamps();
+    }
     
 }

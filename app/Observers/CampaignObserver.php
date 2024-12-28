@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enum\FulfillmentStatusEnum;
 use App\Models\Campaign;
 use App\Models\Customer;
 use App\Enum\TypeCampaignEnum;
@@ -69,18 +70,18 @@ class CampaignObserver
                 return [
                     $customer->id => [
                         'last_purchase_at' => $lastOrder ? $lastOrder->date_last_order : null,
+                        'fulfillment_status' => FulfillmentStatusEnum::Pending->value, // Marcamos como pendiente por defecto
+                        'fulfilled_via_block_id' => null,
                     ],
                 ];
             });
-        
+
             // Asociar los clientes con la campaña y guardar la fecha de la última compra
             $campaign->customers()->sync($campaignCustomerData->toArray());
-        
         }
 
 
-        if($campaign->type_campaign == TypeCampaignEnum::Medical->value) {
-            
+        if ($campaign->type_campaign == TypeCampaignEnum::Medical->value) {
         }
     }
 

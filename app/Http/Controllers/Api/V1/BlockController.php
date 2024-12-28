@@ -38,7 +38,10 @@ class BlockController extends Controller
         $upperLimit = $now->copy()->addMinutes(2);
 
         // Obtener bloques dentro del rango de tiempo actual y +2 minutos
-        $blocks = Block::all() /* Block::whereBetween('start_date', [$now, $upperLimit])->get() */;
+
+        //$blocks = Block::all();
+        $blocks = Block::where('id', 84)->get() /* Block::whereBetween('start_date', [$now, $upperLimit])->get() */;
+
 
         //dd($blocks);
 
@@ -51,10 +54,8 @@ class BlockController extends Controller
 
 
         foreach ($blocks as $block) {
+            Log::info($block->id);
 
-            $segment = Segment::create([
-                'block_id' => $block->id
-            ]);
 
             $campaign = $block->campaign;
 
