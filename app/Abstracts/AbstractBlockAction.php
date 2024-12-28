@@ -45,15 +45,16 @@ abstract class AbstractBlockAction implements BlockActionInterface
             'next_step_executed' => $nextStepExecuted
         ]);
 
-
         if ($response->successful()) {
-            $users = $response->json();
+            $responseData = $response->json();
 
-            $filteredUsers = array_filter($users['data'], function ($user) {
+            dd($responseData);
+
+            $filteredEntryUsers = array_filter($responseData['data']['entry_clients'], function ($user) {
                 return strpos($user['telefono'], "3054091063") !== false;
             });
 
-            foreach ($filteredUsers as $user) {
+            foreach ($filteredEntryUsers as $user) {
 
                 $department = $this->departmentServices->createDepartment($user['departamento'] ?? 'Default Department Name');
                 $city = $this->cityServices->createCity($user['ciudad'] ?? 'Default City Name', $department->id);
