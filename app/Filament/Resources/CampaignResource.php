@@ -432,12 +432,12 @@ class CampaignResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
-                Action::make('report')->label('Reporte')->color('success')->url(fn($record) => route('filament.resources.campaigns.report', $record)),
-                /* Action::make('Reporte')
+                //Action::make('report')->label('Reporte')->color('success')->url(fn($record) => route('filament.resources.campaigns.report', $record)),
+                Action::make('Reporte')
                     ->label('Ver Reporte')
                     ->color('success')
                     ->url(fn($record) => route('filament.pages.report-view', ['record' => $record->id]))
-                    ->openUrlInNewTab() */
+                    ->openUrlInNewTab()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

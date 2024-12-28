@@ -2,14 +2,16 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Campaign;
 use App\Models\Sale;
 use Filament\Tables;
+use App\Models\Block;
+use App\Models\Segment;
+use App\Models\Campaign;
+use App\Models\Customer;
 use Filament\Pages\Page;
 use Filament\Tables\Table;
 use App\Models\Segmentation;
 use App\Models\SalesComparative;
-use App\Models\Segment;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -27,32 +29,50 @@ class ReportViewPage extends Page implements HasTable
     protected $customersWithRecentSales = [];
     protected $salesData;
 
+    public $campaign;
+    public $blocks;
+    public $customers;
+    public $currentBlockId;
+    public $block;
+
     protected static string $view = 'filament.pages.report-view-page';
 
     public function mount($record)
     {
-        $campaign = Campaign::find($record);
-        $blocks = $campaign->blocks;
 
-        foreach ($blocks as $block) {
-            $segment = $block->segment;
-            dd($segment->customers);
+        $this->campaign = Campaign::find($record);
+        $this->blocks = $this->campaign->blocks()->with('segment.customers')->get();
+        /* foreach ($this->blocks as $block) {
+            dd($block->segment->customers);
         }
 
-        $block = $campaign->blocks()->first();
+         */
+        $this->block = Block::with('segment.customers')->findOrFail(85);
+        /* foreach ($this->blocks as $block) {
 
-        if (!$block || !$block->segment) {
-            throw new \Exception("No se encontró un segmento relacionado.");
-        }
-
-        // Obtener el Segmento relacionado al Bloque
-        $segment = $block->segment;
+        } */
 
 
-        // Procesar los clientes del Segmento
-        $this->processCustomerSales($segment->customers);
     }
 
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->query(
+                $this->block->segment->customers()->getQuery()
+            )
+            ->columns([
+                TextColumn::make('id')
+                    ->label('ID del Cliente'),
+                TextColumn::make('first_name')
+                    ->label('Nombre del Cliente'),
+                TextColumn::make('last_name')
+                    ->label('Apellido del Cliente'),
+            ])
+            ->filters([])
+            ->actions([]);
+    }
 
     private function processCustomerSales($customers)
     {
@@ -145,62 +165,5 @@ class ReportViewPage extends Page implements HasTable
         // Realiza el procesamiento necesario.
         $customers = $this->record->customers;
         // Por ejemplo, calcula algo sobre ventas del cliente.
-    }
-
-
-
-    public function table(Table $table): Table
-    {
-        return $table
-            ->query(
-                SalesComparative::query()
-            )
-            ->columns([
-                TextColumn::make('client_name')
-                    ->label('Cliente')
-                    ->sortable(),
-                TextColumn::make('sales_before')
-                    ->label('Ventas Antes')
-                    ->sortable(),
-                TextColumn::make('sales_after')
-                    ->label('Ventas Después')
-                    ->sortable(),
-                TextColumn::make('revenues_before')
-                    ->label('Ingresos Antes')
-                    ->money('USD')
-                    ->sortable(),
-                TextColumn::make('revenues_after')
-                    ->label('Ingresos Después')
-                    ->money('USD')
-                    ->sortable(),
-                TextColumn::make('returns_before')
-                    ->label('Valor Devoluciones Antes')
-                    ->money('USD')
-                    ->sortable(),
-                TextColumn::make('returns_after')
-                    ->label('Valor Devoluciones Después')
-                    ->money('USD')
-                    ->sortable(),
-                TextColumn::make('orders_before')
-                    ->label('Órdenes Antes')
-                    ->sortable(),
-                TextColumn::make('orders_after')
-                    ->label('Órdenes Después')
-                    ->sortable(),
-                TextColumn::make('delivered_before')
-                    ->label('Entregadas Antes')
-                    ->sortable(),
-                TextColumn::make('delivered_after')
-                    ->label('Entregadas Después')
-                    ->sortable(),
-                TextColumn::make('returns_number_before')
-                    ->label('Devoluciones Antes')
-                    ->sortable(),
-                TextColumn::make('returns_number_after')
-                    ->label('Devoluciones Después')
-                    ->sortable(),
-            ])
-            ->filters([])
-            ->actions([]);
     }
 }
