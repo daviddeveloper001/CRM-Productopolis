@@ -32,16 +32,23 @@ class ReportViewPage extends Page implements HasTable
     public function mount($record)
     {
         $campaign = Campaign::find($record);
+        $blocks = $campaign->blocks;
+
+        foreach ($blocks as $block) {
+            $segment = $block->segment;
+            dd($segment->customers);
+        }
+
         $block = $campaign->blocks()->first();
 
         if (!$block || !$block->segment) {
             throw new \Exception("No se encontró un segmento relacionado.");
         }
-    
+
         // Obtener el Segmento relacionado al Bloque
         $segment = $block->segment;
 
-   
+
         // Procesar los clientes del Segmento
         $this->processCustomerSales($segment->customers);
     }
@@ -50,19 +57,19 @@ class ReportViewPage extends Page implements HasTable
     private function processCustomerSales($customers)
     {
         SalesComparative::truncate(); // (Opcional) Elimina datos antiguos antes de procesar nuevos registros
-    
+
         $cont = 0;
         foreach ($customers as $customer) {
             $lastSale = Sale::where('customer_id', $customer->id)
                 ->orderBy('date_last_order', 'desc')
                 ->first();
-                
-                //dd($lastSale);
+
+            //dd($lastSale);
             // Si no hay ventas relacionadas, continuar con el siguiente cliente
             if (!$lastSale) {
                 continue;
             }
-    
+
             // Inicializar valores "Antes"
             $totalSalesBefore = 0;
             $totalRevenuesBefore = 0;
@@ -70,7 +77,7 @@ class ReportViewPage extends Page implements HasTable
             $ordersNumberBefore = 0;
             $deliveredBefore = 0;
             $returnsNumberBefore = 0;
-    
+
             // Iterar sobre todas las ventas del cliente para obtener los valores "Antes"
             foreach ($customer->sales as $sale) {
                 if ($lastSale->date_last_order > $sale->date_last_order) { // Solo considerar ventas anteriores a la última venta
@@ -86,11 +93,11 @@ class ReportViewPage extends Page implements HasTable
                     }
                 }
             }
-    
+
             // Crear un nuevo registro en SalesComparative
             SalesComparative::create([
                 'client_name' => $customer->first_name,
-    
+
                 // Campos "Antes"
                 'sales_before' => $totalSalesBefore,
                 'revenues_before' => $totalRevenuesBefore,
@@ -98,7 +105,7 @@ class ReportViewPage extends Page implements HasTable
                 'orders_before' => $ordersNumberBefore,
                 'delivered_before' => $deliveredBefore,
                 'returns_number_before' => $returnsNumberBefore,
-    
+
                 // Campos "Después" tomados directamente de $lastSale
                 'sales_after' => 1, // La última venta cuenta como una venta después
                 'revenues_after' => $lastSale->total_revenues ?? 0,
@@ -109,7 +116,7 @@ class ReportViewPage extends Page implements HasTable
             ]);
         }
     }
-    
+
     public function report()
     {
         $customers = $this->segment->customers;
