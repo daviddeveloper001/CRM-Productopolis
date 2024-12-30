@@ -14,7 +14,6 @@ class SaleServices
     public function __construct(
         private SaleRepository $saleRepository,
         private CustomerServices $customerServices,
-        private SegmentationServices $segmentationServices,
         private ShopServices $shopServices,
         private PaymentMethodServices $paymentMethodServices,
         private SellerServices $sellerServices,

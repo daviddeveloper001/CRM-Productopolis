@@ -8,20 +8,21 @@ use App\Models\Segment;
 use App\Models\Campaign;
 use App\Models\Customer;
 use App\Models\CustomerSegment;
+use App\Services\SegmentServices;
 use Illuminate\Support\Facades\DB;
 use App\Enum\FulfillmentStatusEnum;
+use Illuminate\Support\Facades\Log;
 use App\Repositories\SaleRepository;
 use App\Interfaces\CampaignActionInterface;
-use Illuminate\Support\Facades\Log;
 
 class ProductoPolisAction implements CampaignActionInterface
 {
-    public function __construct(private SaleRepository $saleRepository) {}
+    
+    public function __construct(private SaleRepository $saleRepository, private SegmentServices $segmentServices  ) {}
     public function executeCampaign(Block $block): void
     {
-        Segment::create([
-            'block_id' => $block->id
-        ]);
+
+        $this->segmentServices->createSegment($block->id);
 
         $query = Customer::with([
             'sales',
