@@ -1,13 +1,13 @@
 <?php
 
 namespace App\Providers;
-use App\Models\Block;
 use App\Models\Campaign;
+use App\Actions\BuyAction;
+use App\Actions\BudgetAction;
+
 use App\Actions\MedicalAction;
 use App\Services\CityServices;
-
 use App\Services\EventService;
-use App\Observers\BlockObserver;
 use App\Actions\SchedulingAction;
 use App\Services\CountryServices;
 use App\Services\CustomerServices;
@@ -41,6 +41,26 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->singleton(BudgetAction::class, function ($app) {
+            return new BudgetAction(
+                $app->make(CityServices::class),
+                $app->make(DepartmentServices::class),
+                $app->make(CountryServices::class),
+                $app->make(CustomerServices::class),
+                $app->make(EventService::class),
+            );
+        });
+
+        $this->app->singleton(BuyAction::class, function ($app) {
+            return new BuyAction(
+                $app->make(CityServices::class),
+                $app->make(DepartmentServices::class),
+                $app->make(CountryServices::class),
+                $app->make(CustomerServices::class),
+                $app->make(EventService::class),
+            );
+        });
+
     }
 
     /**
@@ -48,7 +68,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //Block::observe(BlockObserver::class);
         Campaign::observe(CampaignObserver::class);
     }
 }
