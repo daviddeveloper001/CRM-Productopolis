@@ -40,7 +40,7 @@ class BlockController extends Controller
         // Obtener bloques dentro del rango de tiempo actual y +2 minutos
 
         //$blocks = Block::all();
-        $blocks = Block::where('id', 87)->get() /* Block::whereBetween('start_date', [$now, $upperLimit])->get() */;
+        $blocks = Block::where('id', 92)->get() /* Block::whereBetween('start_date', [$now, $upperLimit])->get() */;
 
 
         //dd($blocks);
