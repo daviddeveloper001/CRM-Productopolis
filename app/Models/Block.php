@@ -50,4 +50,14 @@ class Block extends Model
         return $this->hasOne(Segment::class);
     }
 
+
+    protected static function booted()
+    {
+        static::saving(function ($block) {
+            // Obtén el valor de filters.exit_criterion desde la campaña asociada
+            if (!$block->exit_criterion) {
+                $block->exit_criterion = $block->campaign->filters['exit_criterion'] ?? null;
+            }
+        });
+    }
 }

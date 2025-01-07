@@ -307,9 +307,6 @@ class CampaignResource extends Resource
                                 Select::make('filters.exit_criterion')
                                     ->label('Criterio de salida')
                                     ->options(fn(callable $get) => match ($get('type_campaign')) {
-                                        TypeCampaignEnum::ProductoPolis->value => [
-                                            EventProductoPolisEnum::Venta->value => 'Venta',
-                                        ],
                                         TypeCampaignEnum::Medical->value => collect(EventEnum::cases())
                                             ->mapWithKeys(fn($event) => [$event->value => $event->name])
                                             ->toArray(),
@@ -317,7 +314,6 @@ class CampaignResource extends Resource
                                     })
                                     ->hidden(fn(callable $get) => $get('type_campaign') !== TypeCampaignEnum::Medical->value)
                                     ->reactive()
-
                                     ->columnSpan([
                                         'sm' => 2,
                                         'xl' => 3,
@@ -387,13 +383,18 @@ class CampaignResource extends Resource
                                     ->enum(EventEnum::class)
                                     ->hidden()
                             ])
-                            ->afterStateHydrated(function (array $state, callable $get, callable $set) {
+                            ->afterStateUpdated(function (callable $get, callable $set) {
+                                // Cada vez que el estado cambie, actualiza el valor de los bloques
                                 $exitCriterion = $get('filters.exit_criterion') ?? null;
 
-                                foreach ($state as &$block) {
+                                $blocks = $get('blocks') ?? [];
+                                foreach ($blocks as &$block) {
                                     $block['exit_criterion'] = $exitCriterion;
                                 }
+
+                                $set('blocks', $blocks);
                             })
+                            ->dehydrated()
                             ->columnSpan(12)
 
                     ])
