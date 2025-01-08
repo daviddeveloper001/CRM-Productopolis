@@ -10,6 +10,7 @@ use App\Services\CityServices;
 use App\Services\EventService;
 use App\Actions\SchedulingAction;
 use App\Services\CountryServices;
+use App\Services\SegmentServices;
 use App\Services\CustomerServices;
 use App\Observers\CampaignObserver;
 use App\Actions\DemonstrationAction;
@@ -28,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(CountryServices::class),
                 $app->make(CustomerServices::class),
                 $app->make(EventService::class),
+                $app->make(SegmentServices::class),
             );
         });
 
@@ -38,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(CountryServices::class),
                 $app->make(CustomerServices::class),
                 $app->make(EventService::class),
+                $app->make(SegmentServices::class),
             );
         });
 
@@ -48,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(CountryServices::class),
                 $app->make(CustomerServices::class),
                 $app->make(EventService::class),
+                $app->make(SegmentServices::class),
             );
         });
 
@@ -58,6 +62,7 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(CountryServices::class),
                 $app->make(CustomerServices::class),
                 $app->make(EventService::class),
+                $app->make(SegmentServices::class),
             );
         });
 
